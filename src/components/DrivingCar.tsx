@@ -27,14 +27,16 @@ export function DrivingCar() {
     const vh = () => window.innerHeight / 100;
 
     // --- scroll path -------------------------------------------------------
-    gsap.set(o, { xPercent: -50, yPercent: -50, x: 0, y: () => -95 * vh(), rotation: 180 });
+    gsap.set(o, { xPercent: -50, yPercent: -50, x: () => 6 * vw(), y: () => 2 * vh(), rotation: 90, opacity: 0, scale: 0.85 });
     const tl = gsap.timeline({
       scrollTrigger: { trigger: "#journey", start: "top top", end: "bottom top", scrub: 1.2, invalidateOnRefresh: true },
     });
     // On phones the car stays in the upper half; copy sits at the bottom.
     // hold while the hero car drives off, then the top-down car drops in
-    tl.to({}, { duration: 0.8 })
-      .to(o, { y: () => (mobile() ? -10 : -2) * vh(), duration: 1, ease: "power1.in" })
+    // the side-view hero car hands over here: same spot, facing the same way, then it drifts off
+    tl.to({}, { duration: 0.55 })
+      .to(o, { opacity: 1, scale: 1, duration: 0.25, ease: "power1.out" })
+      .to(o, { x: 0, y: () => (mobile() ? -10 : -2) * vh(), rotation: 180, duration: 1, ease: "power2.inOut" })
       .to(o, { x: () => (mobile() ? -16 : -27) * vw(), y: () => (mobile() ? -20 : 12) * vh(), rotation: 118, duration: 1, ease: "sine.inOut" })
       .to(o, { x: () => (mobile() ? 16 : 27) * vw(), y: () => (mobile() ? -24 : 0) * vh(), rotation: 248, duration: 1.2, ease: "sine.inOut" })
       .to(o, {
@@ -116,7 +118,7 @@ export function DrivingCar() {
       const d = (e as CustomEvent).detail as { x: number; y: number; vx?: number; vy?: number; n?: number; big?: number };
       for (let k = 0; k < (d.n ?? 6); k++)
         puffs.push({
-          x: d.x + (Math.random() - 0.5) * 30, y: d.y + window.scrollY + (Math.random() - 0.5) * 16,
+          x: d.x + (Math.random() - 0.5) * 90, y: d.y + window.scrollY + (Math.random() - 0.5) * 24,
           vx: (d.vx ?? 0) + (Math.random() - 0.5) * 80, vy: (d.vy ?? -20) + (Math.random() - 0.5) * 40,
           r: 14 + Math.random() * 18, grow: (60 + Math.random() * 90) * (d.big ?? 1), age: 0, life: 1.8 + Math.random() * 1.8,
         });
