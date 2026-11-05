@@ -172,7 +172,7 @@ export function DrivingCar() {
             alt="Jeep Wrangler Rubicon, top view"
             width={768}
             height={1280}
-            className="h-[min(40vh,62vw)] w-auto drop-shadow-[0_30px_30px_rgba(0,0,0,0.6)]"
+            className="h-[min(40vh,62vw)] w-auto car-shadow"
           />
         </div>
       </div>

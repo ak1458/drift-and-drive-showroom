@@ -131,3 +131,7 @@
 @utility animate-ignition {
   animation: ignition 0.6s ease-out;
 }
+
+@utility car-shadow {
+  filter: drop-shadow(0 30px 28px color-mix(in oklab, var(--background) 85%, black));
+}
