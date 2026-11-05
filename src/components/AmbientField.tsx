@@ -35,12 +35,12 @@ export function AmbientField() {
     paint();
     window.addEventListener("theme:change", paint);
 
-    const N = mobile ? 70 : 160;
+    const N = mobile ? 45 : 110;
     const ps: P[] = Array.from({ length: N }, () => ({
       x: Math.random() * W, y: Math.random() * H, z: 0.3 + Math.random() * 0.7,
       vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
       rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.8,
-      s: 2 + Math.random() * 5, c: Math.floor(Math.random() * 5),
+      s: 1.5 + Math.random() * 3.5, c: Math.floor(Math.random() * 5),
     }));
 
     const ptr = { x: -9999, y: -9999, active: false };
