@@ -99,7 +99,7 @@ export function DrivingCar() {
       const dark = document.documentElement.classList.contains("dark");
       // dark mode: pale champagne smoke · light mode: graphite smoke
       const c = dark ? ["236,228,212", "210,200,182", "180,170,152"] : ["90,84,76", "120,112,100", "150,142,130"];
-      smokeAlpha = dark ? 0.42 : 0.3;
+      smokeAlpha = dark ? 0.6 : 0.42;
       sc.clearRect(0, 0, 128, 128);
       const g = sc.createRadialGradient(64, 64, 0, 64, 64, 64);
       g.addColorStop(0, `rgba(${c[0]},0.9)`);
@@ -110,7 +110,22 @@ export function DrivingCar() {
     };
     paintSprite();
     window.addEventListener("theme:change", paintSprite);
-    const maxPuffs = mobile() ? 320 : 700;
+    const maxPuffs = mobile() ? 450 : 1100;
+    // other parts of the page (hero car) can puff smoke here
+    const onEmit = (e: Event) => {
+      const d = (e as CustomEvent).detail as { x: number; y: number; vx?: number; vy?: number; n?: number; big?: number };
+      for (let k = 0; k < (d.n ?? 6); k++)
+        puffs.push({
+          x: d.x + (Math.random() - 0.5) * 30, y: d.y + window.scrollY + (Math.random() - 0.5) * 16,
+          vx: (d.vx ?? 0) + (Math.random() - 0.5) * 80, vy: (d.vy ?? -20) + (Math.random() - 0.5) * 40,
+          r: 14 + Math.random() * 18, grow: (60 + Math.random() * 90) * (d.big ?? 1), age: 0, life: 1.8 + Math.random() * 1.8,
+        });
+    };
+    window.addEventListener("smoke:emit", onEmit);
+    // pointer stirs the smoke
+    const ptr = { x: -9999, y: -9999, vx: 0, vy: 0 };
+    const onPtr = (e: PointerEvent) => { ptr.vx = e.clientX - ptr.x; ptr.vy = e.clientY - ptr.y; ptr.x = e.clientX; ptr.y = e.clientY; };
+    window.addEventListener("pointermove", onPtr, { passive: true });
 
     const puffs: Puff[] = [];
     let last = { rot: 180, cx: 0, cy: 0, init: false };
@@ -131,7 +146,7 @@ export function DrivingCar() {
 
       const exitY = gsap.getProperty(exitEl, "y") as number;
       const onScreen = cy + exitY > -200 && cy + exitY < window.innerHeight + 200;
-      let emit = Math.min(5, dRot * 1.6 + speed * 0.03 + burst * 4);
+      let emit = Math.min(9, dRot * 3 + speed * 0.07 + burst * 6);
       if (!onScreen) emit = 0;
       if (emit > 0.15) {
         const W = i.offsetWidth;
@@ -173,6 +188,8 @@ export function DrivingCar() {
         const t = s.age / s.life;
         s.x += s.vx * dt;
         s.y += s.vy * dt;
+        const ddx = s.x - ptr.x, ddy = s.y - sy - ptr.y, dd = Math.hypot(ddx, ddy);
+        if (dd < 160) { s.vx += ptr.vx * 0.9 + (ddx / (dd + 1)) * 30; s.vy += ptr.vy * 0.9 + (ddy / (dd + 1)) * 30; }
         s.vx *= 0.97;
         s.vy *= 0.97;
         const r = s.r + s.grow * Math.sqrt(t);
@@ -180,6 +197,7 @@ export function DrivingCar() {
         ctx.drawImage(sprite, s.x - r, s.y - sy - r, r * 2, r * 2);
       }
       ctx.globalAlpha = 1;
+      ptr.vx *= 0.5; ptr.vy *= 0.5;
     };
     if (!reduce) gsap.ticker.add(tick);
 
@@ -194,6 +212,8 @@ export function DrivingCar() {
       window.removeEventListener("resize", resize);
       window.removeEventListener("car:launch", onLaunch);
       window.removeEventListener("car:return", onReturn);
+      window.removeEventListener("smoke:emit", onEmit);
+      window.removeEventListener("pointermove", onPtr);
     };
   }, []);
 
