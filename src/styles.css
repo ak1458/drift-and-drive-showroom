@@ -57,7 +57,7 @@
 .booking-band { background: var(--background); padding-block: 70px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 .collection-section { padding-block: 110px; }
 .collection-feature { display: grid; grid-template-columns: 1.3fr 1fr; gap: 80px; align-items: center; }
-.collection-photo { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+.collection-photo { width: 100%; aspect-ratio: 4/3; object-fit: contain; background: var(--hero); }
 .collection-details { max-width: 330px; }
 .rental-fields { display: grid; grid-template-columns: .8fr 1fr 1fr 1.5fr auto; align-items: center; gap: 24px; padding-block: 28px; }
 .rental-field { display: flex; flex-direction: column; min-width: 0; gap: 10px; }
