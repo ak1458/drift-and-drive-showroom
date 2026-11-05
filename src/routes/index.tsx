@@ -172,7 +172,7 @@ function Index() {
               Self-drive · Lucknow
             </p>
             <div className="hero-drive relative z-10 mt-[14svh] w-[min(100vw,720px)] md:mt-[16svh]">
-              <div className="hero-tilt [transform-style:preserve-3d]" style={{ transformPerspective: 900 } as React.CSSProperties}>
+              <div className="hero-tilt [transform-style:preserve-3d]" style={{ perspective: 900 }}>
               <div className="hero-float relative origin-bottom -rotate-3">
                 <div className="headlights pointer-events-none absolute left-[18%] top-[38%] h-[30%] w-[45%] rounded-full bg-primary/40 opacity-35 blur-3xl" aria-hidden />
                 <img
