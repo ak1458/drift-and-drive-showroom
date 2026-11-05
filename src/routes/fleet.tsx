@@ -7,9 +7,9 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 export const Route = createFileRoute("/fleet")({
   head: () => ({
     meta: [
-      { title: "Fleet — Rubicon Rentals Lucknow" },
+      { title: "Fleet — Sky Car Rental Lucknow" },
       { name: "description", content: "Add or remove the vehicles offered for rent in Lucknow." },
-      { property: "og:title", content: "Fleet — Rubicon Rentals" },
+      { property: "og:title", content: "Fleet — Sky Car Rental" },
       { property: "og:description", content: "Manage the vehicles available for booking." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -38,14 +38,14 @@ function FleetPage() {
   };
 
   return (
-    <div className="road-grid min-h-svh px-5 py-6 md:px-16">
+    <div className="min-h-svh px-5 py-6 md:px-16">
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
         <Link to="/" className="font-display text-xl font-black uppercase">
-          Rubicon<span className="text-primary">/</span>LKO
+          Sky<span className="text-highlight">.</span> <span className="font-mono text-[10px] font-normal tracking-[0.3em] text-muted-foreground">Car Rental</span>
         </Link>
         <div className="flex shrink-0 items-center gap-4">
         <ThemeToggle />
-        <Link to="/" hash="book" className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-primary">
+        <Link to="/" hash="book" className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-highlight">
           ← Back
         </Link>
         </div>
@@ -77,7 +77,7 @@ function FleetPage() {
         </ul>
 
         <form onSubmit={submit} className="h-fit space-y-3 border border-border bg-card p-6">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary">Add vehicle</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-highlight">Add vehicle</p>
           <input className={field} placeholder="Name e.g. Tata Harrier" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           <input className={field} placeholder="Type e.g. SUV" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} />
           <div className="grid grid-cols-2 gap-3">

@@ -56,7 +56,7 @@ export function Booking() {
 
       {stage === "done" ? (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">Confirmed</p>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-highlight">Confirmed</p>
           <h3 className="mt-2 font-display text-5xl font-black uppercase leading-none">Keys are yours.</h3>
           <dl className="mt-6 space-y-2 border-t border-border pt-4 font-mono text-sm">
             <Row k="Ref" v={ref} />
@@ -65,7 +65,7 @@ export function Booking() {
             <Row k="Return" v={ret} />
             <Row k="Total" v={inr(total)} />
           </dl>
-          <button onClick={again} className="mt-6 w-full border border-border py-3 font-mono text-xs uppercase tracking-[0.2em] transition-colors hover:border-primary hover:text-primary">
+          <button onClick={again} className="mt-6 w-full border border-border py-3 font-mono text-xs uppercase tracking-[0.2em] transition-colors hover:border-primary hover:text-highlight">
             Book another drive
           </button>
         </div>
@@ -79,7 +79,7 @@ export function Booking() {
           <div className="mt-6">
             <div className="mb-2 flex items-baseline justify-between">
               <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Vehicle</span>
-              <Link to="/fleet" className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-primary">
+              <Link to="/fleet" className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-highlight">
                 Edit fleet →
               </Link>
             </div>
@@ -118,7 +118,7 @@ export function Booking() {
             </div>
             <div className="text-right font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
               Total
-              <div className="mt-1 font-display text-3xl font-black text-primary">{inr(total)}</div>
+              <div className="mt-1 font-display text-3xl font-black text-highlight">{inr(total)}</div>
             </div>
           </div>
 
