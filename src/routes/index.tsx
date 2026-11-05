@@ -111,7 +111,7 @@ function Index() {
             <p className={`${label} hero-word absolute inset-x-0 top-[13svh] text-center text-muted-foreground md:top-[9svh]`}>
               Self-drive · Lucknow
             </p>
-            <div className="hero-drive relative z-10 mt-[14svh] w-[min(100vw,820px)] md:mt-[12svh]">
+            <div className="hero-drive relative z-10 mt-[14svh] w-[min(100vw,720px)] md:mt-[16svh]">
               <div className="hero-float origin-bottom -rotate-3">
                 <img
                   src={jeepHero}
