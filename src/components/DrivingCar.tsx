@@ -78,7 +78,7 @@ export function DrivingCar() {
     window.addEventListener("car:return", onReturn);
 
     // --- smoke -------------------------------------------------------------
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, mobile() ? 1.5 : 2);
     const resize = () => {
       cv.width = window.innerWidth * dpr;
       cv.height = window.innerHeight * dpr;
@@ -92,12 +92,23 @@ export function DrivingCar() {
     const sprite = document.createElement("canvas");
     sprite.width = sprite.height = 128;
     const sc = sprite.getContext("2d")!;
-    const g = sc.createRadialGradient(64, 64, 0, 64, 64, 64);
-    g.addColorStop(0, "rgba(232,226,214,0.9)");
-    g.addColorStop(0.45, "rgba(205,198,186,0.45)");
-    g.addColorStop(1, "rgba(180,172,160,0)");
-    sc.fillStyle = g;
-    sc.fillRect(0, 0, 128, 128);
+    let smokeAlpha = 0.42;
+    const paintSprite = () => {
+      const dark = document.documentElement.classList.contains("dark");
+      // dark mode: pale champagne smoke · light mode: graphite smoke
+      const c = dark ? ["236,228,212", "210,200,182", "180,170,152"] : ["90,84,76", "120,112,100", "150,142,130"];
+      smokeAlpha = dark ? 0.42 : 0.3;
+      sc.clearRect(0, 0, 128, 128);
+      const g = sc.createRadialGradient(64, 64, 0, 64, 64, 64);
+      g.addColorStop(0, `rgba(${c[0]},0.9)`);
+      g.addColorStop(0.45, `rgba(${c[1]},0.45)`);
+      g.addColorStop(1, `rgba(${c[2]},0)`);
+      sc.fillStyle = g;
+      sc.fillRect(0, 0, 128, 128);
+    };
+    paintSprite();
+    window.addEventListener("theme:change", paintSprite);
+    const maxPuffs = mobile() ? 320 : 700;
 
     const puffs: Puff[] = [];
     let last = { rot: 180, cx: 0, cy: 0, init: false };
@@ -145,7 +156,7 @@ export function DrivingCar() {
             });
           }
         }
-        if (puffs.length > 700) puffs.splice(0, puffs.length - 700);
+        if (puffs.length > maxPuffs) puffs.splice(0, puffs.length - maxPuffs);
       }
 
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -163,7 +174,7 @@ export function DrivingCar() {
         s.vx *= 0.97;
         s.vy *= 0.97;
         const r = s.r + s.grow * Math.sqrt(t);
-        ctx.globalAlpha = Math.pow(1 - t, 1.6) * 0.42;
+        ctx.globalAlpha = Math.pow(1 - t, 1.6) * smokeAlpha;
         ctx.drawImage(sprite, s.x - r, s.y - sy - r, r * 2, r * 2);
       }
       ctx.globalAlpha = 1;
@@ -175,6 +186,9 @@ export function DrivingCar() {
       tl.scrollTrigger?.kill();
       tl.kill();
       rumble.kill();
+      exitTween.scrollTrigger?.kill();
+      exitTween.kill();
+      window.removeEventListener("theme:change", paintSprite);
       window.removeEventListener("resize", resize);
       window.removeEventListener("car:launch", onLaunch);
       window.removeEventListener("car:return", onReturn);
@@ -184,16 +198,18 @@ export function DrivingCar() {
   return (
     <>
       <canvas ref={canvas} className="pointer-events-none fixed inset-0 z-20" aria-hidden />
-      <div ref={outer} className="pointer-events-none fixed left-1/2 top-1/2 z-30 will-change-transform">
+      <div ref={exit} className="pointer-events-none fixed inset-0 z-30">
+      <div ref={outer} className="absolute left-1/2 top-1/2 will-change-transform">
         <div ref={inner}>
           <img
             src={jeepTop}
             alt="Jeep Wrangler Rubicon, top view"
             width={768}
             height={1280}
-            className="h-[min(40vh,62vw)] w-auto car-shadow"
+            className="h-[min(40svh,58vw)] w-auto car-shadow"
           />
         </div>
+      </div>
       </div>
     </>
   );
