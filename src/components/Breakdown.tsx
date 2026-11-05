@@ -42,7 +42,7 @@ export function Breakdown() {
     <section ref={root} id="breakdown" className="relative flex h-svh flex-col justify-center overflow-hidden px-5 md:px-16">
       <div className="mb-4 flex items-end justify-between gap-4 md:mb-0">
         <div>
-          <p className={`${label} text-highlight`}>02 — Breakdown</p>
+          <p className={`${label} text-highlight`}>Breakdown</p>
           <h2 className="mt-3 font-display text-[13vw] font-black uppercase leading-[0.85] md:text-7xl">Every part,<br />checked.</h2>
         </div>
         <p className="hidden max-w-xs text-muted-foreground md:block">Scroll to take it apart. Every car is inspected piece by piece before it reaches your door.</p>
