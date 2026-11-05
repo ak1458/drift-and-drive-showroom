@@ -6,7 +6,7 @@ import jeepTop from "@/assets/jeep-top.png";
 type Puff = { x: number; y: number; vx: number; vy: number; r: number; grow: number; age: number; life: number };
 
 /**
- * One fixed layer above the page: a top-down Rubicon driven by scroll,
+ * One fixed layer above the page: a top-down Jeep driven by scroll,
  * plus a full-page smoke canvas fed from the rear tyres.
  */
 export function DrivingCar() {
@@ -32,7 +32,9 @@ export function DrivingCar() {
       scrollTrigger: { trigger: "#journey", start: "top top", end: "bottom top", scrub: 1.2, invalidateOnRefresh: true },
     });
     // On phones the car stays in the upper half; copy sits at the bottom.
-    tl.to(o, { y: () => (mobile() ? -10 : -2) * vh(), duration: 1, ease: "power1.in" })
+    // hold while the hero car drives off, then the top-down car drops in
+    tl.to({}, { duration: 0.8 })
+      .to(o, { y: () => (mobile() ? -10 : -2) * vh(), duration: 1, ease: "power1.in" })
       .to(o, { x: () => (mobile() ? -16 : -27) * vw(), y: () => (mobile() ? -20 : 12) * vh(), rotation: 118, duration: 1, ease: "sine.inOut" })
       .to(o, { x: () => (mobile() ? 16 : 27) * vw(), y: () => (mobile() ? -24 : 0) * vh(), rotation: 248, duration: 1.2, ease: "sine.inOut" })
       .to(o, {

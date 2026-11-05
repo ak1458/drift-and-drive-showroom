@@ -23,7 +23,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       onClick={flip}
       aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
       className={cn(
-        "group flex h-9 items-center gap-2 border border-border px-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-primary hover:text-primary",
+        "group flex h-9 items-center gap-2 border border-border px-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-primary hover:text-highlight",
         className,
       )}
     >

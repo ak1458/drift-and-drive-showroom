@@ -78,9 +78,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#0e0e0f" },
-      { title: "Rubicon Rentals — Lucknow" },
-      { name: "description", content: "Rent a Jeep Rubicon and more in Lucknow." },
+      { name: "theme-color", content: "#0a0a0a" },
+      { title: "Sky Car Rental — Lucknow" },
+      { name: "description", content: "Premium self-drive car rental in Lucknow." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
