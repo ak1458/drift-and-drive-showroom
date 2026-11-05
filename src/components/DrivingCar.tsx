@@ -118,7 +118,7 @@ export function DrivingCar() {
       const d = (e as CustomEvent).detail as { x: number; y: number; vx?: number; vy?: number; n?: number; big?: number };
       for (let k = 0; k < (d.n ?? 6); k++)
         puffs.push({
-          x: d.x + (Math.random() - 0.5) * 30, y: d.y + window.scrollY + (Math.random() - 0.5) * 16,
+          x: d.x + (Math.random() - 0.5) * 90, y: d.y + window.scrollY + (Math.random() - 0.5) * 24,
           vx: (d.vx ?? 0) + (Math.random() - 0.5) * 80, vy: (d.vy ?? -20) + (Math.random() - 0.5) * 40,
           r: 14 + Math.random() * 18, grow: (60 + Math.random() * 90) * (d.big ?? 1), age: 0, life: 1.8 + Math.random() * 1.8,
         });

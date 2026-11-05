@@ -73,7 +73,7 @@ function Index() {
           spin += d * 1.4;
           gsap.set(".hero-wheel", { rotation: spin });
           const v = Math.abs(st.getVelocity());
-          if (Math.abs(d) > 0.5 && st.progress < 0.55) puff(Math.min(12, 1 + Math.floor(v / 250)), 1 + Math.min(v / 2000, 1.2));
+          if (Math.abs(d) > 0.5 && st.progress < 0.42) puff(Math.min(12, 1 + Math.floor(v / 250)), 1 + Math.min(v / 2000, 1.2));
         },
       });
       gsap.timeline({ scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: 0.4 } })
@@ -81,7 +81,7 @@ function Index() {
         .to(".hero-drive", { y: () => window.innerHeight * 0.55, x: () => window.innerWidth * 0.06, duration: 0.55, ease: "none" }, 0)
         .to(".hero-body", { rotation: -1.5, duration: 0.2, ease: "power1.out" }, 0)
         // hand-over: side car melts away as the top-down car fades in at the same spot
-        .to(".hero-drive", { opacity: 0, scale: 0.8, duration: 0.15, ease: "power1.in" }, 0.4);
+        .to(".hero-drive", { opacity: 0, scale: 0.8, duration: 0.15, ease: "power1.in" }, 0.3);
 
       // outline word slides opposite to the car
       gsap.to(".hero-word-big", { xPercent: -25, ease: "none", scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: true } });
@@ -164,7 +164,7 @@ function Index() {
       <main className="relative z-10">
         <div id="journey">
           {/* HERO */}
-          <section id="hero" className="relative flex h-svh flex-col items-center justify-center overflow-hidden">
+          <section id="hero" className="relative flex h-svh flex-col items-center justify-center">
             <div className="spotlight pointer-events-none absolute inset-0" aria-hidden />
             <h1 className="hero-fade pointer-events-none absolute inset-x-0 top-[17svh] select-none text-center font-display font-black uppercase leading-[0.8] md:top-[11svh]">
               <span className="hero-word hero-word-big block text-[44vw] text-outline md:text-[26vw]">Sky</span>
