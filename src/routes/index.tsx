@@ -2,9 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import jeepHero from "@/assets/jeep-hero.png";
+import body from "@/assets/part-body.png";
+import wheel from "@/assets/part-wheel.png";
 import { DrivingCar } from "@/components/DrivingCar";
-import { Breakdown } from "@/components/Breakdown";
 import { Booking } from "@/components/Booking";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Tyre } from "@/components/Tyre";
@@ -47,69 +47,63 @@ function Index() {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const ctx = gsap.context(() => {
-      gsap.from(".hero-car", { y: 80, scale: 0.85, opacity: 0, duration: 1.4, ease: "power3.out" });
       gsap.from(".hero-word", { yPercent: 40, opacity: 0, duration: 1.2, stagger: 0.08, ease: "power3.out" });
+      gsap.from(".hero-drive", { opacity: 0, x: -60, duration: 1.6, ease: "power3.out" });
+      gsap.from(".studio-light", { opacity: 0, duration: 2.2, ease: "power2.out", delay: 0.3 });
 
-      // road rushing past under the car
-      gsap.utils.toArray<HTMLElement>(".streak").forEach((el, k) => {
-        gsap.fromTo(el, { xPercent: -120, left: "100%" }, { left: "-40%", duration: 0.6 + (k % 4) * 0.25, ease: "none", repeat: -1, delay: k * 0.13 });
-      });
-      // suspension bounce over the road + slight wander
-      gsap.to(".hero-car", { y: -3, duration: 0.18, yoyo: true, repeat: -1, ease: "sine.inOut" });
-      gsap.to(".hero-tilt", { xPercent: 2, duration: 2.6, yoyo: true, repeat: -1, ease: "sine.inOut" });
-      // idle: engine running, body gently rocking
-      gsap.to(".hero-float", { y: -6, rotation: -0.8, duration: 1.4, yoyo: true, repeat: -1, ease: "sine.inOut" });
-      // hero car stays put at first, then drives off to the left
-      // drives off left with a drift: nose swings, tyres smoke
-      const car = document.querySelector<HTMLElement>(".hero-car")!;
+      // engine idle: tiny body rumble, wheels still
+      gsap.to(".hero-body", { y: 1.2, duration: 0.08, yoyo: true, repeat: -1, ease: "none" });
+
+      const wheelR = document.querySelector<HTMLElement>(".hero-wheel-r")!;
       const puff = (n: number, big = 1) => {
-        const r = car.getBoundingClientRect();
-        if (r.right < 0) return;
-        window.dispatchEvent(new CustomEvent("smoke:emit", { detail: { x: r.left + r.width * 0.72, y: r.top + r.height * 0.82, vx: 120, vy: -30, n, big } }));
-        window.dispatchEvent(new CustomEvent("smoke:emit", { detail: { x: r.left + r.width * 0.3, y: r.top + r.height * 0.86, vx: 80, vy: -20, n: Math.ceil(n / 2), big } }));
+        const r = wheelR.getBoundingClientRect();
+        if (r.bottom < 0 || r.width === 0) return;
+        window.dispatchEvent(new CustomEvent("smoke:emit", { detail: { x: r.left + r.width * 0.4, y: r.bottom - r.height * 0.08, vx: -160, vy: -25, n, big } }));
       };
-      let lastP = 0;
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: "#hero", start: "18% top", end: "bottom top", scrub: 0.6,
-          onUpdate: (st) => { const d = Math.abs(st.progress - lastP); lastP = st.progress; if (d > 0.002) puff(Math.min(10, Math.ceil(d * 400))); },
+
+      // scroll: wheels turn with the scroll, rear tyre smokes, car creeps forward then hands over to the drift car
+      let spin = 0;
+      let lastY = window.scrollY;
+      ScrollTrigger.create({
+        trigger: "#hero", start: "top top", end: "bottom top",
+        onUpdate: (st) => {
+          const y = window.scrollY;
+          const d = y - lastY;
+          lastY = y;
+          spin += d * 1.4;
+          gsap.set(".hero-wheel", { rotation: spin });
+          const v = Math.abs(st.getVelocity());
+          if (Math.abs(d) > 0.5 && st.progress < 0.55) puff(Math.min(12, 1 + Math.floor(v / 250)), 1 + Math.min(v / 2000, 1.2));
         },
-      })
-        .to(".hero-drive", { rotation: 8, x: "4vw", scale: 1.05, duration: 0.3, ease: "power1.out" })
-        .to(".hero-drive", { xPercent: -150, rotation: -14, scale: 0.9, duration: 0.7, ease: "power2.in" });
+      });
+      gsap.timeline({ scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: 0.4 } })
+        // stays on screen while the page scrolls under it
+        .to(".hero-drive", { y: () => window.innerHeight * 0.55, x: () => window.innerWidth * 0.06, duration: 0.55, ease: "none" }, 0)
+        .to(".hero-body", { rotation: -1.5, duration: 0.2, ease: "power1.out" }, 0)
+        // hand-over: side car melts away as the top-down car fades in at the same spot
+        .to(".hero-drive", { opacity: 0, scale: 0.8, duration: 0.15, ease: "power1.in" }, 0.4);
 
       // outline word slides opposite to the car
-      gsap.to(".hero-word-big", { xPercent: 25, ease: "none", scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: true } });
+      gsap.to(".hero-word-big", { xPercent: -25, ease: "none", scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: true } });
 
-      // pointer / tilt: car follows the cursor in 3D
-      const tilt = document.querySelector<HTMLElement>(".hero-tilt")!;
-      gsap.set(tilt, { transformPerspective: 900 });
-      const rx = gsap.quickTo(tilt, "rotationX", { duration: 0.8, ease: "power3" });
-      const ry = gsap.quickTo(tilt, "rotationY", { duration: 0.8, ease: "power3" });
-      const tx = gsap.quickTo(tilt, "x", { duration: 0.8, ease: "power3" });
+      // studio light follows the pointer a little
       const spot = document.querySelector<HTMLElement>(".spotlight")!;
       const onMove = (e: PointerEvent) => {
         if (window.scrollY > window.innerHeight) return;
-        const nx = e.clientX / window.innerWidth - 0.5;
-        const ny = e.clientY / window.innerHeight - 0.5;
-        ry(nx * 22); rx(-ny * 10); tx(nx * 30);
-        spot.style.setProperty("--sx", `${50 + nx * 40}%`);
-        spot.style.setProperty("--sy", `${55 + ny * 30}%`);
+        spot.style.setProperty("--sx", `${50 + (e.clientX / window.innerWidth - 0.5) * 30}%`);
       };
       window.addEventListener("pointermove", onMove, { passive: true });
 
-      // tap/click the car: rev the engine
+      // tap/click the car: rev — wheels spin, rear tyre burns
+      const car = document.querySelector<HTMLElement>(".hero-drive")!;
       const rev = () => {
-        gsap.timeline()
-          .to(".hero-float", { x: -4, rotation: -2, duration: 0.05, repeat: 9, yoyo: true, ease: "none" })
-          .to(".hero-float", { x: 0, rotation: 0, duration: 0.3, ease: "elastic.out(1,0.4)" });
-        gsap.fromTo(".headlights", { opacity: 1 }, { opacity: 0.35, duration: 0.9, ease: "power2.out" });
+        if (window.scrollY > 40) return;
+        gsap.to(".hero-wheel", { rotation: "+=1080", duration: 1.2, ease: "power2.out", onUpdate: () => void (spin = gsap.getProperty(wheelR, "rotation") as number) });
+        gsap.fromTo(".hero-body", { rotation: -2 }, { rotation: 0, duration: 1, ease: "elastic.out(1,0.4)" });
         let k = 0;
-        const iv = setInterval(() => { puff(6, 1.3); if (++k > 8) clearInterval(iv); }, 60);
+        const iv = setInterval(() => { puff(6, 1.4); if (++k > 10) clearInterval(iv); }, 60);
       };
       car.addEventListener("click", rev);
-      // gentle exhaust while idling
-      const idle = setInterval(() => { if (window.scrollY < 40 && !document.hidden) puff(2, 0.8); }, 260);
 
       // sections: headlines lean into the scroll
       gsap.utils.toArray<HTMLElement>(".lean").forEach((el, n) => {
@@ -124,7 +118,6 @@ function Index() {
         gsap.to(".strip-inner", { skewX: gsap.utils.clamp(-20, 20, -v / 120), duration: 0.3, overwrite: "auto" });
       } });
 
-      return () => { window.removeEventListener("pointermove", onMove); car.removeEventListener("click", rev); clearInterval(idle); };
       gsap.to(".hero-fade", {
         opacity: 0,
         scrollTrigger: { trigger: "#hero", start: "top top", end: "90% top", scrub: true },
@@ -136,6 +129,8 @@ function Index() {
 
       // speedometer line fills as you read the steps
       gsap.fromTo(".rev-line", { scaleX: 0 }, { scaleX: 1, ease: "none", scrollTrigger: { trigger: "#process", start: "top 70%", end: "bottom 60%", scrub: true } });
+
+      return () => { window.removeEventListener("pointermove", onMove); car.removeEventListener("click", rev); };
 
     }, root);
     return () => ctx.revert();
@@ -178,27 +173,14 @@ function Index() {
             <p className={`${label} hero-word absolute inset-x-0 top-[13svh] text-center text-muted-foreground md:top-[9svh]`}>
               Self-drive · Lucknow
             </p>
-            <div className="streaks pointer-events-none absolute inset-x-0 top-[62svh] h-[22svh] md:top-[58svh]" aria-hidden>
-              {Array.from({ length: 9 }).map((_, k) => (
-                <span key={k} className="streak absolute h-px bg-gradient-to-l from-transparent via-foreground/40 to-transparent" style={{ top: `${(k * 37) % 100}%`, width: `${18 + ((k * 23) % 30)}%` }} />
-              ))}
-            </div>
-            <div className="hero-drive relative z-10 mt-[14svh] w-[min(100vw,720px)] md:mt-[16svh]">
-              <div className="hero-tilt [transform-style:preserve-3d]" style={{ perspective: 900 }}>
-              <div className="hero-float relative origin-bottom -rotate-3">
-                <div className="headlights pointer-events-none absolute left-[18%] top-[38%] h-[30%] w-[45%] rounded-full bg-primary/40 opacity-35 blur-3xl" aria-hidden />
-                <img
-                  src={jeepHero}
-                  alt="Jeep Wrangler Rubicon, three-quarter view"
-                  width={1536}
-                  height={1024}
-                  fetchPriority="high"
-                  className="hero-car relative w-full cursor-pointer"
-                  title="Tap to rev"
-                />
+            <div className="studio-light pointer-events-none absolute inset-x-0 top-0 h-[80svh]" aria-hidden />
+            <div className="hero-drive relative z-10 mt-[22svh] w-[min(94vw,880px)] cursor-pointer md:mt-[24svh]" title="Tap to rev">
+              <div className="hero-body relative aspect-[2/1] origin-bottom">
+                <img src={body} alt="Jeep Wrangler Rubicon, side view" width={1536} height={768} fetchPriority="high" className="hero-shade absolute inset-0 w-full" />
+                <img src={wheel} alt="" width={816} height={816} className="hero-wheel hero-wheel-r hero-shade absolute left-[8.5%] top-[49.5%] w-[22%]" />
+                <img src={wheel} alt="" width={816} height={816} className="hero-wheel hero-wheel-f hero-shade absolute left-[72%] top-[49.5%] w-[22%]" />
               </div>
-              </div>
-              <div className="car-floor mx-auto -mt-[6%] h-10 w-[80%]" aria-hidden />
+              <div className="car-floor mx-auto -mt-[1%] h-8 w-[90%]" aria-hidden />
             </div>
             <div className={`${label} hero-fade absolute inset-x-0 bottom-6 flex items-end justify-between px-5 text-muted-foreground md:bottom-8 md:px-10`}>
               <span className="hero-word">Lucknow only<br />From ₹4,500/day</span>
@@ -262,8 +244,6 @@ function Index() {
             ))}
           </div>
         </div>
-
-        <Breakdown />
 
         {/* 04 — GARAGE */}
         <section id="garage" className="px-5 py-24 md:px-16 md:py-32">

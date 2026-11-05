@@ -160,3 +160,13 @@
 @utility car-shadow {
   filter: drop-shadow(0 30px 28px color-mix(in oklab, var(--background) 85%, black));
 }
+
+/* Car sits in the dark, lifted by a soft overhead studio light */
+@utility studio-light {
+  background:
+    radial-gradient(38% 55% at 50% 0%, color-mix(in oklab, var(--foreground) 14%, transparent), transparent 70%),
+    radial-gradient(30% 22% at var(--sx, 50%) 72%, color-mix(in oklab, var(--primary) 10%, transparent), transparent 70%);
+}
+@utility hero-shade {
+  filter: brightness(0.62) contrast(1.15) saturate(0.85) drop-shadow(0 -2px 6px color-mix(in oklab, var(--foreground) 18%, transparent));
+}
