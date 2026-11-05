@@ -12,7 +12,7 @@ import { inr, useFleet } from "@/lib/fleet";
 import { fleetMedia } from "@/lib/fleet-media";
 
 export const Route=createFileRoute("/")({head:()=>({meta:[{title:"Sky Car Rental — Your Drive, Your Way | Lucknow"},{name:"description",content:"Find your next self-drive in Lucknow. Explore the Sky Car Rental fleet, choose dates and compare daily rental estimates."},{property:"og:title",content:"Sky Car Rental — Your Drive, Your Way"},{property:"og:description",content:"A considered collection of self-drive cars in Lucknow. Find a car that fits your journey."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Index});
-const faqs=[
+const faqs: [string, string][]=[
  ["Where does my rental start?","Sky Car Rental is based in Lucknow. Your rental starts and ends in Lucknow; pickup details are agreed when a reservation is arranged."],
  ["How is the rental estimate calculated?","The displayed daily rate is multiplied by your selected rental days. A same-day trip counts as one day. Deposits, fuel and any additional charges are not included in this estimate."],
  ["Can I reserve a car on this page?","You can explore cars and calculate a rental estimate here. No payment is taken and no reservation is submitted through this preview."],
@@ -43,7 +43,7 @@ function Index(){
     <img src={hero} alt="Graphite Jeep Wrangler in a softly lit concrete showroom" width={1920} height={1024} fetchPriority="high" className="hero-photo"/>
     <div className="page-width hero-content">
      <p className="load-reveal eyebrow flex items-center gap-2"><span className="size-1.5 rounded-full bg-primary"/> Self-drive car rental · Lucknow</p>
-     <h1 className="load-reveal hero-title font-display">SKY CAR RENTAL<span className="mt-2 block text-primary">YOUR DRIVE.<br/>YOUR WAY.</span></h1>
+     <h1 className="load-reveal hero-title font-display"><span className="hero-brand">SKY CAR RENTAL</span><span className="mt-2 block text-primary">YOUR DRIVE.<br/>YOUR WAY.</span></h1>
      <p className="load-reveal mt-5 max-w-[245px] text-base text-hero-foreground/75">A city to explore. A road to take.<br/>A car that feels like you.</p>
      <Button asChild variant="outline" className="load-reveal mt-7 h-11 border-hero-foreground/40 bg-transparent text-hero-foreground hover:bg-hero-foreground hover:text-hero"><a href="#garage">Explore the fleet <ArrowUpRight/></a></Button>
     </div>

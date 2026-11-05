@@ -14,6 +14,6 @@ export function SiteHeader() {
       </nav>
       <div className="flex items-center gap-3"><ThemeToggle/><Button asChild className="hidden sm:inline-flex"><Link to="/" hash="book">Find your drive <ArrowUpRight/></Link></Button><Button variant="ghost" size="icon" className="md:hidden" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen(!open)}>{open ? <X/> : <Menu/>}</Button></div>
     </div>
-    {open && <nav className="page-width flex flex-col gap-5 border-t border-border py-6 md:hidden" aria-label="Mobile navigation">{[["garage","Our fleet"],["approach","The Sky way"],["questions","Good to know"],["book","Find your drive"]].map(([hash,label])=><Link key={hash} to="/" hash={hash} onClick={()=>setOpen(false)}>{label}</Link>)}</nav>}
+    {open && <nav className="page-width flex flex-col gap-5 border-t border-border py-6 md:hidden" aria-label="Mobile navigation">{([{hash:"garage",label:"Our fleet"},{hash:"approach",label:"The Sky way"},{hash:"questions",label:"Good to know"},{hash:"book",label:"Find your drive"}]).map(({hash,label})=><Link key={hash} to="/" hash={hash} onClick={()=>setOpen(false)}>{label}</Link>)}</nav>}
   </header>;
 }

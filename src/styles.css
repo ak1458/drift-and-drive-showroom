@@ -71,10 +71,13 @@
 @media (max-width: 767px) {
  .page-width { width: calc(100% - 40px); }
  .hero-stage { height: 690px; min-height: 0; max-height: 88svh; }
- .hero-photo { height: 58%; top: auto; bottom: 55px; object-fit: cover; object-position: 69% center; }
+ .hero-photo { width: 145%; max-width: none; height: auto; left: -45%; top: auto; bottom: 55px; object-fit: contain; }
  .hero-stage::after { background: linear-gradient(180deg, var(--hero) 25%, transparent 60%); }
  .hero-content { padding-top: 32px; }
- .hero-title { font-size: 76px; max-width: 350px; margin-top: 18px; }
+ .hero-title { font-size: 68px; max-width: 350px; margin-top: 18px; }
+ .hero-brand { display: block; font-size: 48px; }
+ .hero-content > p:not(.eyebrow) { margin-top: 14px; font-size: 14px; }
+ .hero-content > a { margin-top: 18px; }
  .hero-caption { bottom: 18px; }
  .section-title { font-size: 48px; }
  .section-space { padding-block: 56px; }
