@@ -58,11 +58,11 @@ export function Breakdown() {
         <img src={wheel} alt="" loading="lazy" className={`${part} bd-wheel-r left-[8.5%] top-[45%] z-40 w-[22%]`} />
         <img src={wheel} alt="" loading="lazy" className={`${part} bd-wheel-f left-[72%] top-[45%] z-40 w-[22%]`} />
 
-        <span className={`${label} bd-tag absolute -top-[30%] left-0 text-highlight`}>Body — steel + alloy</span>
-        <span className={`${label} bd-tag absolute -top-[2%] right-0 text-right text-highlight`}>2.0L turbo · 8-speed</span>
-        <span className={`${label} bd-tag absolute top-[38%] left-[30%] text-highlight`}>5-seat cabin</span>
-        <span className={`${label} bd-tag absolute top-[92%] left-[30%] text-highlight`}>Ladder frame · 4×4 axles</span>
-        <span className={`${label} bd-tag absolute top-[128%] left-0 text-highlight`}>33" mud terrain</span>
+        <span className={`${label} bd-tag absolute z-50 bg-background/70 px-1 -top-[30%] left-0 text-highlight`}>Body — steel + alloy</span>
+        <span className={`${label} bd-tag absolute z-50 bg-background/70 px-1 -top-[2%] right-0 text-right text-highlight`}>2.0L turbo · 8-speed</span>
+        <span className={`${label} bd-tag absolute z-50 bg-background/70 px-1 top-[38%] left-[30%] text-highlight`}>5-seat cabin</span>
+        <span className={`${label} bd-tag absolute z-50 bg-background/70 px-1 top-[92%] left-[30%] text-highlight`}>Ladder frame · 4×4 axles</span>
+        <span className={`${label} bd-tag absolute z-50 bg-background/70 px-1 top-[128%] left-0 text-highlight`}>33" mud terrain</span>
       </div>
 
       <div className="absolute inset-x-5 bottom-6 h-px bg-border md:inset-x-16">
