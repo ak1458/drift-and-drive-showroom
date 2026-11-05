@@ -30,9 +30,10 @@ export function DrivingCar() {
     const tl = gsap.timeline({
       scrollTrigger: { trigger: "#journey", start: "top top", end: "bottom top", scrub: 1.2, invalidateOnRefresh: true },
     });
-    tl.to(o, { y: () => -2 * vh(), duration: 1, ease: "power1.in" })
-      .to(o, { x: () => (mobile() ? -14 : -27) * vw(), y: () => 12 * vh(), rotation: 118, duration: 1, ease: "sine.inOut" })
-      .to(o, { x: () => (mobile() ? 14 : 27) * vw(), y: () => 0, rotation: 248, duration: 1.2, ease: "sine.inOut" })
+    // On phones the car stays in the upper half; copy sits at the bottom.
+    tl.to(o, { y: () => (mobile() ? -10 : -2) * vh(), duration: 1, ease: "power1.in" })
+      .to(o, { x: () => (mobile() ? -16 : -27) * vw(), y: () => (mobile() ? -20 : 12) * vh(), rotation: 118, duration: 1, ease: "sine.inOut" })
+      .to(o, { x: () => (mobile() ? 16 : 27) * vw(), y: () => (mobile() ? -24 : 0) * vh(), rotation: 248, duration: 1.2, ease: "sine.inOut" })
       .to(o, {
         x: () => (mobile() ? 0 : -25 * vw()),
         y: () => (mobile() ? -30 : 4) * vh(),
@@ -40,6 +41,21 @@ export function DrivingCar() {
         duration: 1.4,
         ease: "power2.inOut",
       });
+
+    // After booking the car stays "parked" in the page and scrolls away with it.
+    const exitEl = exit.current!;
+    const exitTween = gsap.to(exitEl, {
+      y: () => -window.innerHeight,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#book",
+        start: () => (mobile() ? "top top" : "bottom bottom"),
+        end: () => "+=" + window.innerHeight,
+        scrub: true,
+        invalidateOnRefresh: true,
+      },
+    });
+    ScrollTrigger.config({ ignoreMobileResize: true });
 
     // body roll / idle rumble
     const rumble = gsap.to(i.firstElementChild, { y: 1.2, duration: 0.07, yoyo: true, repeat: -1, ease: "none" });
