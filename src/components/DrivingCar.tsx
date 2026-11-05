@@ -129,7 +129,7 @@ export function DrivingCar() {
           const lx = side * W * 0.38;
           const ly = H * 0.3;
           const px = cx + lx * cos - ly * sin;
-          const py = cy + lx * sin + ly * cos;
+          const py = cy + exitY + lx * sin + ly * cos;
           const n = Math.floor(emit) + (Math.random() < emit % 1 ? 1 : 0);
           for (let k = 0; k < n; k++) {
             puffs.push({
