@@ -105,7 +105,8 @@ export function DrivingCar() {
       const dt = Math.min(dtMs, 50) / 1000;
       const rect = i.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
+      // ignore the "parked, scrolling away" offset so it doesn't smoke
+      const cy = rect.top + rect.height / 2 - (gsap.getProperty(exitEl, "y") as number);
       const rot = gsap.getProperty(o, "rotation") as number;
       if (!last.init) last = { rot, cx, cy, init: true };
       const dRot = Math.abs(rot - last.rot);
@@ -114,7 +115,8 @@ export function DrivingCar() {
       const my = cy - last.cy;
       last = { rot, cx, cy, init: true };
 
-      const onScreen = cy > -200 && cy < window.innerHeight + 200;
+      const exitY = gsap.getProperty(exitEl, "y") as number;
+      const onScreen = cy + exitY > -200 && cy + exitY < window.innerHeight + 200;
       let emit = Math.min(5, dRot * 1.6 + speed * 0.03 + burst * 4);
       if (!onScreen) emit = 0;
       if (emit > 0.15) {
