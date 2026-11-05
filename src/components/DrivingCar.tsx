@@ -132,7 +132,7 @@ export function DrivingCar() {
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       const sy = window.scrollY;
       for (let p = puffs.length - 1; p >= 0; p--) {
-        const s = puffs[p];
+        const s = puffs[p]!;
         s.age += dt;
         if (s.age >= s.life) {
           puffs.splice(p, 1);

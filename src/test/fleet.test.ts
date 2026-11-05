@@ -13,6 +13,6 @@ describe("booking rules", () => {
   });
   it("starts with five vehicles, Rubicon first", () => {
     expect(DEFAULT_FLEET).toHaveLength(5);
-    expect(DEFAULT_FLEET[0].name).toBe("Jeep Wrangler Rubicon");
+    expect(DEFAULT_FLEET[0]?.name).toBe("Jeep Wrangler Rubicon");
   });
 });
