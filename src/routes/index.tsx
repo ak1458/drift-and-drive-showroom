@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import jeepHero from "@/assets/jeep-hero.png";
 import { DrivingCar } from "@/components/DrivingCar";
+import { AmbientField } from "@/components/AmbientField";
 import { Booking } from "@/components/Booking";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Tyre } from "@/components/Tyre";
@@ -52,12 +53,70 @@ function Index() {
       // idle: engine running, body gently rocking
       gsap.to(".hero-float", { y: -6, rotation: -0.8, duration: 1.4, yoyo: true, repeat: -1, ease: "sine.inOut" });
       // hero car stays put at first, then drives off to the left
-      gsap.to(".hero-drive", {
-        xPercent: -140,
-        rotation: -6,
-        ease: "power2.in",
-        scrollTrigger: { trigger: "#hero", start: "25% top", end: "bottom top", scrub: true },
+      // drives off left with a drift: nose swings, tyres smoke
+      const car = document.querySelector<HTMLElement>(".hero-car")!;
+      const puff = (n: number, big = 1) => {
+        const r = car.getBoundingClientRect();
+        if (r.right < 0) return;
+        window.dispatchEvent(new CustomEvent("smoke:emit", { detail: { x: r.left + r.width * 0.72, y: r.top + r.height * 0.82, vx: 120, vy: -30, n, big } }));
+        window.dispatchEvent(new CustomEvent("smoke:emit", { detail: { x: r.left + r.width * 0.3, y: r.top + r.height * 0.86, vx: 80, vy: -20, n: Math.ceil(n / 2), big } }));
+      };
+      let lastP = 0;
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: "#hero", start: "18% top", end: "bottom top", scrub: 0.6,
+          onUpdate: (st) => { const d = Math.abs(st.progress - lastP); lastP = st.progress; if (d > 0.002) puff(Math.min(10, Math.ceil(d * 400))); },
+        },
+      })
+        .to(".hero-drive", { rotation: 8, x: "4vw", scale: 1.05, duration: 0.3, ease: "power1.out" })
+        .to(".hero-drive", { xPercent: -150, rotation: -14, scale: 0.9, duration: 0.7, ease: "power2.in" });
+
+      // outline word slides opposite to the car
+      gsap.to(".hero-word-big", { xPercent: 25, ease: "none", scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: true } });
+
+      // pointer / tilt: car follows the cursor in 3D
+      const tilt = document.querySelector<HTMLElement>(".hero-tilt")!;
+      const rx = gsap.quickTo(tilt, "rotationX", { duration: 0.8, ease: "power3" });
+      const ry = gsap.quickTo(tilt, "rotationY", { duration: 0.8, ease: "power3" });
+      const tx = gsap.quickTo(tilt, "x", { duration: 0.8, ease: "power3" });
+      const spot = document.querySelector<HTMLElement>(".spotlight")!;
+      const onMove = (e: PointerEvent) => {
+        if (window.scrollY > window.innerHeight) return;
+        const nx = e.clientX / window.innerWidth - 0.5;
+        const ny = e.clientY / window.innerHeight - 0.5;
+        ry(nx * 22); rx(-ny * 10); tx(nx * 30);
+        spot.style.setProperty("--sx", `${50 + nx * 40}%`);
+        spot.style.setProperty("--sy", `${55 + ny * 30}%`);
+      };
+      window.addEventListener("pointermove", onMove, { passive: true });
+
+      // tap/click the car: rev the engine
+      const rev = () => {
+        gsap.timeline()
+          .to(".hero-float", { x: -4, rotation: -2, duration: 0.05, repeat: 9, yoyo: true, ease: "none" })
+          .to(".hero-float", { x: 0, rotation: 0, duration: 0.3, ease: "elastic.out(1,0.4)" });
+        gsap.fromTo(".headlights", { opacity: 1 }, { opacity: 0.35, duration: 0.9, ease: "power2.out" });
+        let k = 0;
+        const iv = setInterval(() => { puff(6, 1.3); if (++k > 8) clearInterval(iv); }, 60);
+      };
+      car.addEventListener("click", rev);
+      // gentle exhaust while idling
+      const idle = setInterval(() => { if (window.scrollY < 40 && !document.hidden) puff(1, 0.6); }, 450);
+
+      // sections: headlines lean into the scroll
+      gsap.utils.toArray<HTMLElement>(".lean").forEach((el, n) => {
+        gsap.fromTo(el, { xPercent: n % 2 ? -12 : 12, skewX: n % 2 ? 6 : -6 }, { xPercent: n % 2 ? 6 : -6, skewX: 0, ease: "none", scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true } });
       });
+      // speed strip reacts to scroll velocity
+      const strip = gsap.to(".strip-inner", { xPercent: -50, duration: 18, ease: "none", repeat: -1 });
+      ScrollTrigger.create({ onUpdate: (st) => {
+        const v = st.getVelocity();
+        strip.timeScale(1 + Math.min(Math.abs(v) / 150, 12) * (v < 0 ? -1 : 1));
+        gsap.to(strip, { timeScale: 1, duration: 1, overwrite: true, delay: 0.1 });
+        gsap.to(".strip-inner", { skewX: gsap.utils.clamp(-20, 20, -v / 120), duration: 0.3, overwrite: "auto" });
+      } });
+
+      return () => { window.removeEventListener("pointermove", onMove); car.removeEventListener("click", rev); clearInterval(idle); };
       gsap.to(".hero-fade", {
         opacity: 0,
         scrollTrigger: { trigger: "#hero", start: "top top", end: "90% top", scrub: true },
@@ -85,6 +144,7 @@ function Index() {
 
   return (
     <div ref={root} className="grain relative overflow-x-clip">
+      <AmbientField />
       <DrivingCar />
 
       <header className="fixed inset-x-0 top-0 z-40 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 bg-background/75 backdrop-blur-md px-5 py-4 md:px-10 md:py-5">
@@ -105,22 +165,26 @@ function Index() {
           <section id="hero" className="relative flex h-svh flex-col items-center justify-center overflow-hidden">
             <div className="spotlight pointer-events-none absolute inset-0" aria-hidden />
             <h1 className="hero-fade pointer-events-none absolute inset-x-0 top-[17svh] select-none text-center font-display font-black uppercase leading-[0.8] md:top-[11svh]">
-              <span className="hero-word block text-[44vw] text-outline md:text-[26vw]">Sky</span>
+              <span className="hero-word hero-word-big block text-[44vw] text-outline md:text-[26vw]">Sky</span>
               <span className="sr-only">Sky Car Rental — Lucknow</span>
             </h1>
             <p className={`${label} hero-word absolute inset-x-0 top-[13svh] text-center text-muted-foreground md:top-[9svh]`}>
               Self-drive · Lucknow
             </p>
             <div className="hero-drive relative z-10 mt-[14svh] w-[min(100vw,720px)] md:mt-[16svh]">
-              <div className="hero-float origin-bottom -rotate-3">
+              <div className="hero-tilt [transform-style:preserve-3d]" style={{ transformPerspective: 900 } as React.CSSProperties}>
+              <div className="hero-float relative origin-bottom -rotate-3">
+                <div className="headlights pointer-events-none absolute left-[18%] top-[38%] h-[30%] w-[45%] rounded-full bg-primary/40 opacity-35 blur-3xl" aria-hidden />
                 <img
                   src={jeepHero}
                   alt="Jeep Wrangler Rubicon, three-quarter view"
                   width={1536}
                   height={1024}
                   fetchPriority="high"
-                  className="hero-car w-full"
+                  className="hero-car relative w-full cursor-pointer"
+                  title="Tap to rev"
                 />
+              </div>
               </div>
               <div className="car-floor mx-auto -mt-[6%] h-10 w-[80%]" aria-hidden />
             </div>
@@ -138,7 +202,7 @@ function Index() {
           <section className="flex h-svh items-end justify-end px-5 pb-[10svh] md:items-center md:px-16 md:pb-0">
             <div className="reveal max-w-md">
               <p className={`${label} text-highlight`}>01 — Arrival</p>
-              <h2 className="mt-4 font-display text-[15vw] font-black uppercase leading-[0.85] md:text-8xl">
+              <h2 className="lean mt-4 font-display text-[15vw] font-black uppercase leading-[0.85] md:text-8xl">
                 It doesn't park.<br />It arrives.
               </h2>
               <p className="mt-5 text-muted-foreground">Delivered to your door anywhere in Lucknow — Gomti Nagar to Hazratganj — fuelled, detailed, ready.</p>
@@ -149,15 +213,15 @@ function Index() {
           <section className="flex h-svh items-end px-5 pb-[8svh] md:items-center md:px-16 md:pb-0">
             <div className="reveal w-full max-w-lg">
               <p className={`${label} text-highlight`}>02 — Machine</p>
-              <h2 className="mt-4 font-display text-[15vw] font-black uppercase leading-[0.85] md:text-8xl">Built for<br />every road.</h2>
-              <dl className="mt-6 grid grid-cols-2 gap-px border border-border bg-border font-mono md:mt-8">
+              <h2 className="lean mt-4 font-display text-[15vw] font-black uppercase leading-[0.85] md:text-8xl">Built for<br />every road.</h2>
+              <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-5 font-mono md:mt-8">
                 {[
                   ["Engine", "2.0L Turbo"],
                   ["Drive", "4×4 Rock-Trac"],
                   ["Gearbox", "8-speed auto"],
                   ["Seats", "5 adults"],
                 ].map(([k, v]) => (
-                  <div key={k as string} className="bg-background p-3 md:p-4">
+                  <div key={k as string} className="border-t border-border pt-3">
                     <dt className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground md:text-[11px]">{k}</dt>
                     <dd className="mt-1 text-base md:text-lg">{v}</dd>
                   </div>
@@ -175,12 +239,24 @@ function Index() {
           </div>
         </section>
 
+        <div className="overflow-hidden border-y border-border py-5" aria-hidden>
+          <div className="strip-inner flex w-max gap-10 whitespace-nowrap font-display text-5xl font-black uppercase md:text-7xl">
+            {Array.from({ length: 2 }).map((_, k) => (
+              <span key={k} className="flex gap-10">
+                {["Lucknow", "Self-drive", "Delivered", "4×4", "Full tank", "Sky Car Rental"].map((w) => (
+                  <span key={w} className="flex items-center gap-10"><span className="text-outline">{w}</span><span className="text-highlight">✦</span></span>
+                ))}
+              </span>
+            ))}
+          </div>
+        </div>
+
         {/* 04 — GARAGE */}
         <section id="garage" className="px-5 py-24 md:px-16 md:py-32">
           <div className="reveal flex items-end justify-between gap-6">
             <div className="min-w-0">
               <p className={`${label} text-highlight`}>04 — The garage</p>
-              <h2 className="mt-4 font-display text-[14vw] font-black uppercase leading-[0.85] md:text-8xl">Pick your<br />machine.</h2>
+              <h2 className="lean mt-4 font-display text-[14vw] font-black uppercase leading-[0.85] md:text-8xl">Pick your<br />machine.</h2>
             </div>
             <Link to="/fleet" className={`${label} hidden shrink-0 text-muted-foreground hover:text-highlight md:inline`}>Manage fleet →</Link>
           </div>
@@ -189,6 +265,8 @@ function Index() {
               <a
                 key={v.id}
                 href="#book"
+                onPointerMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); gsap.to(e.currentTarget, { rotationY: ((e.clientX - r.left) / r.width - 0.5) * 14, rotationX: -((e.clientY - r.top) / r.height - 0.5) * 14, transformPerspective: 700, duration: 0.4 }); }}
+                onPointerLeave={(e) => gsap.to(e.currentTarget, { rotationX: 0, rotationY: 0, duration: 0.6, ease: "elastic.out(1,0.5)" })}
                 className="fleet-card group relative flex w-[72vw] shrink-0 snap-start flex-col justify-between border border-border bg-background p-5 transition-colors hover:bg-secondary md:w-auto md:border-0"
               >
                 <span className="font-mono text-xs text-muted-foreground">{String(idx + 1).padStart(2, "0")}</span>
@@ -226,7 +304,7 @@ function Index() {
         <section id="faq" className="grid gap-10 px-5 py-24 md:grid-cols-[1fr_1.4fr] md:px-16 md:py-32">
           <div className="reveal">
             <p className={`${label} text-highlight`}>06 — Before you drive</p>
-            <h2 className="mt-4 font-display text-[14vw] font-black uppercase leading-[0.85] md:text-7xl">Questions.</h2>
+            <h2 className="lean mt-4 font-display text-[14vw] font-black uppercase leading-[0.85] md:text-7xl">Questions.</h2>
           </div>
           <Accordion type="single" collapsible className="reveal border-t border-border">
             {FAQ.map(([q, a]) => (
