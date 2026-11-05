@@ -27,14 +27,16 @@ export function DrivingCar() {
     const vh = () => window.innerHeight / 100;
 
     // --- scroll path -------------------------------------------------------
-    gsap.set(o, { xPercent: -50, yPercent: -50, x: 0, y: () => -95 * vh(), rotation: 180 });
+    gsap.set(o, { xPercent: -50, yPercent: -50, x: () => 6 * vw(), y: () => 8 * vh(), rotation: 90, opacity: 0, scale: 0.85 });
     const tl = gsap.timeline({
       scrollTrigger: { trigger: "#journey", start: "top top", end: "bottom top", scrub: 1.2, invalidateOnRefresh: true },
     });
     // On phones the car stays in the upper half; copy sits at the bottom.
     // hold while the hero car drives off, then the top-down car drops in
-    tl.to({}, { duration: 0.8 })
-      .to(o, { y: () => (mobile() ? -10 : -2) * vh(), duration: 1, ease: "power1.in" })
+    // the side-view hero car hands over here: same spot, facing the same way, then it drifts off
+    tl.to({}, { duration: 0.55 })
+      .to(o, { opacity: 1, scale: 1, duration: 0.25, ease: "power1.out" })
+      .to(o, { x: 0, y: () => (mobile() ? -10 : -2) * vh(), rotation: 180, duration: 1, ease: "power2.inOut" })
       .to(o, { x: () => (mobile() ? -16 : -27) * vw(), y: () => (mobile() ? -20 : 12) * vh(), rotation: 118, duration: 1, ease: "sine.inOut" })
       .to(o, { x: () => (mobile() ? 16 : 27) * vw(), y: () => (mobile() ? -24 : 0) * vh(), rotation: 248, duration: 1.2, ease: "sine.inOut" })
       .to(o, {
