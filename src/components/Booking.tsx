@@ -163,7 +163,7 @@ function DateField({ label, value, min, onChange }: { label: string; value: stri
         value={value}
         min={min || undefined}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 block w-full bg-transparent font-mono text-sm text-foreground outline-none [color-scheme:dark]"
+        className="mt-1 block w-full bg-transparent font-mono text-sm text-foreground outline-none dark:[color-scheme:dark]"
       />
     </label>
   );

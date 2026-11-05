@@ -13,6 +13,7 @@ export function DrivingCar() {
   const outer = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
+  const exit = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -30,9 +31,10 @@ export function DrivingCar() {
     const tl = gsap.timeline({
       scrollTrigger: { trigger: "#journey", start: "top top", end: "bottom top", scrub: 1.2, invalidateOnRefresh: true },
     });
-    tl.to(o, { y: () => -2 * vh(), duration: 1, ease: "power1.in" })
-      .to(o, { x: () => (mobile() ? -14 : -27) * vw(), y: () => 12 * vh(), rotation: 118, duration: 1, ease: "sine.inOut" })
-      .to(o, { x: () => (mobile() ? 14 : 27) * vw(), y: () => 0, rotation: 248, duration: 1.2, ease: "sine.inOut" })
+    // On phones the car stays in the upper half; copy sits at the bottom.
+    tl.to(o, { y: () => (mobile() ? -10 : -2) * vh(), duration: 1, ease: "power1.in" })
+      .to(o, { x: () => (mobile() ? -16 : -27) * vw(), y: () => (mobile() ? -20 : 12) * vh(), rotation: 118, duration: 1, ease: "sine.inOut" })
+      .to(o, { x: () => (mobile() ? 16 : 27) * vw(), y: () => (mobile() ? -24 : 0) * vh(), rotation: 248, duration: 1.2, ease: "sine.inOut" })
       .to(o, {
         x: () => (mobile() ? 0 : -25 * vw()),
         y: () => (mobile() ? -30 : 4) * vh(),
@@ -40,6 +42,21 @@ export function DrivingCar() {
         duration: 1.4,
         ease: "power2.inOut",
       });
+
+    // After booking the car stays "parked" in the page and scrolls away with it.
+    const exitEl = exit.current!;
+    const exitTween = gsap.to(exitEl, {
+      y: () => -window.innerHeight,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#book",
+        start: () => (mobile() ? "top top" : "bottom bottom"),
+        end: () => "+=" + window.innerHeight,
+        scrub: true,
+        invalidateOnRefresh: true,
+      },
+    });
+    ScrollTrigger.config({ ignoreMobileResize: true });
 
     // body roll / idle rumble
     const rumble = gsap.to(i.firstElementChild, { y: 1.2, duration: 0.07, yoyo: true, repeat: -1, ease: "none" });
@@ -61,7 +78,7 @@ export function DrivingCar() {
     window.addEventListener("car:return", onReturn);
 
     // --- smoke -------------------------------------------------------------
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, mobile() ? 1.5 : 2);
     const resize = () => {
       cv.width = window.innerWidth * dpr;
       cv.height = window.innerHeight * dpr;
@@ -75,12 +92,23 @@ export function DrivingCar() {
     const sprite = document.createElement("canvas");
     sprite.width = sprite.height = 128;
     const sc = sprite.getContext("2d")!;
-    const g = sc.createRadialGradient(64, 64, 0, 64, 64, 64);
-    g.addColorStop(0, "rgba(232,226,214,0.9)");
-    g.addColorStop(0.45, "rgba(205,198,186,0.45)");
-    g.addColorStop(1, "rgba(180,172,160,0)");
-    sc.fillStyle = g;
-    sc.fillRect(0, 0, 128, 128);
+    let smokeAlpha = 0.42;
+    const paintSprite = () => {
+      const dark = document.documentElement.classList.contains("dark");
+      // dark mode: pale champagne smoke · light mode: graphite smoke
+      const c = dark ? ["236,228,212", "210,200,182", "180,170,152"] : ["90,84,76", "120,112,100", "150,142,130"];
+      smokeAlpha = dark ? 0.42 : 0.3;
+      sc.clearRect(0, 0, 128, 128);
+      const g = sc.createRadialGradient(64, 64, 0, 64, 64, 64);
+      g.addColorStop(0, `rgba(${c[0]},0.9)`);
+      g.addColorStop(0.45, `rgba(${c[1]},0.45)`);
+      g.addColorStop(1, `rgba(${c[2]},0)`);
+      sc.fillStyle = g;
+      sc.fillRect(0, 0, 128, 128);
+    };
+    paintSprite();
+    window.addEventListener("theme:change", paintSprite);
+    const maxPuffs = mobile() ? 320 : 700;
 
     const puffs: Puff[] = [];
     let last = { rot: 180, cx: 0, cy: 0, init: false };
@@ -89,7 +117,8 @@ export function DrivingCar() {
       const dt = Math.min(dtMs, 50) / 1000;
       const rect = i.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
+      // ignore the "parked, scrolling away" offset so it doesn't smoke
+      const cy = rect.top + rect.height / 2 - (gsap.getProperty(exitEl, "y") as number);
       const rot = gsap.getProperty(o, "rotation") as number;
       if (!last.init) last = { rot, cx, cy, init: true };
       const dRot = Math.abs(rot - last.rot);
@@ -98,7 +127,8 @@ export function DrivingCar() {
       const my = cy - last.cy;
       last = { rot, cx, cy, init: true };
 
-      const onScreen = cy > -200 && cy < window.innerHeight + 200;
+      const exitY = gsap.getProperty(exitEl, "y") as number;
+      const onScreen = cy + exitY > -200 && cy + exitY < window.innerHeight + 200;
       let emit = Math.min(5, dRot * 1.6 + speed * 0.03 + burst * 4);
       if (!onScreen) emit = 0;
       if (emit > 0.15) {
@@ -111,7 +141,7 @@ export function DrivingCar() {
           const lx = side * W * 0.38;
           const ly = H * 0.3;
           const px = cx + lx * cos - ly * sin;
-          const py = cy + lx * sin + ly * cos;
+          const py = cy + exitY + lx * sin + ly * cos;
           const n = Math.floor(emit) + (Math.random() < emit % 1 ? 1 : 0);
           for (let k = 0; k < n; k++) {
             puffs.push({
@@ -126,7 +156,7 @@ export function DrivingCar() {
             });
           }
         }
-        if (puffs.length > 700) puffs.splice(0, puffs.length - 700);
+        if (puffs.length > maxPuffs) puffs.splice(0, puffs.length - maxPuffs);
       }
 
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
@@ -144,7 +174,7 @@ export function DrivingCar() {
         s.vx *= 0.97;
         s.vy *= 0.97;
         const r = s.r + s.grow * Math.sqrt(t);
-        ctx.globalAlpha = Math.pow(1 - t, 1.6) * 0.42;
+        ctx.globalAlpha = Math.pow(1 - t, 1.6) * smokeAlpha;
         ctx.drawImage(sprite, s.x - r, s.y - sy - r, r * 2, r * 2);
       }
       ctx.globalAlpha = 1;
@@ -156,6 +186,9 @@ export function DrivingCar() {
       tl.scrollTrigger?.kill();
       tl.kill();
       rumble.kill();
+      exitTween.scrollTrigger?.kill();
+      exitTween.kill();
+      window.removeEventListener("theme:change", paintSprite);
       window.removeEventListener("resize", resize);
       window.removeEventListener("car:launch", onLaunch);
       window.removeEventListener("car:return", onReturn);
@@ -165,16 +198,18 @@ export function DrivingCar() {
   return (
     <>
       <canvas ref={canvas} className="pointer-events-none fixed inset-0 z-20" aria-hidden />
-      <div ref={outer} className="pointer-events-none fixed left-1/2 top-1/2 z-30 will-change-transform">
+      <div ref={exit} className="pointer-events-none fixed inset-0 z-30">
+      <div ref={outer} className="absolute left-1/2 top-1/2 will-change-transform">
         <div ref={inner}>
           <img
             src={jeepTop}
             alt="Jeep Wrangler Rubicon, top view"
             width={768}
             height={1280}
-            className="h-[min(40vh,62vw)] w-auto car-shadow"
+            className="h-[min(40svh,58vw)] w-auto car-shadow"
           />
         </div>
+      </div>
       </div>
     </>
   );
