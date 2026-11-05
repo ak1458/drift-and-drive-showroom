@@ -6,7 +6,7 @@ import jeepTop from "@/assets/jeep-top.png";
 type Puff = { x: number; y: number; vx: number; vy: number; r: number; grow: number; age: number; life: number };
 
 /**
- * One fixed layer above the page: a top-down Rubicon driven by scroll,
+ * One fixed layer above the page: a top-down Jeep driven by scroll,
  * plus a full-page smoke canvas fed from the rear tyres.
  */
 export function DrivingCar() {

@@ -59,7 +59,6 @@ function Index() {
         scrollTrigger: { trigger: "#hero", start: "25% top", end: "bottom top", scrub: true },
       });
       gsap.to(".hero-fade", {
-        start: 0,
         opacity: 0,
         scrollTrigger: { trigger: "#hero", start: "top top", end: "90% top", scrub: true },
       });
