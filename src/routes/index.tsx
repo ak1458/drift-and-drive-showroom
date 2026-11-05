@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import jeepFront from "@/assets/jeep-front.png";
+import jeepHero from "@/assets/jeep-hero.png";
 import { DrivingCar } from "@/components/DrivingCar";
 import { Booking } from "@/components/Booking";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -13,7 +13,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Sky Car Rental — Drive Lucknow in a Jeep Rubicon" },
+      { title: "Sky Car Rental — Premium Self-Drive in Lucknow" },
       { name: "description", content: "Scroll-to-drive car rental in Lucknow. Pick your dates, choose your 4x4, book in seconds." },
       { property: "og:title", content: "Sky Car Rental — Drive Lucknow" },
       { property: "og:description", content: "Pick your dates, choose your 4x4, book in seconds. Lucknow only." },
@@ -49,18 +49,19 @@ function Index() {
       gsap.from(".hero-car", { y: 80, scale: 0.85, opacity: 0, duration: 1.4, ease: "power3.out" });
       gsap.from(".hero-word", { yPercent: 40, opacity: 0, duration: 1.2, stagger: 0.08, ease: "power3.out" });
 
-      gsap.to(".hero-car", {
-        scale: 2.1,
-        y: "18vh",
-        filter: "blur(6px)",
-        opacity: 0,
+      // idle: engine running, body gently rocking
+      gsap.to(".hero-float", { y: -6, rotation: -0.8, duration: 1.4, yoyo: true, repeat: -1, ease: "sine.inOut" });
+      // hero car stays put at first, then drives off to the left
+      gsap.to(".hero-drive", {
+        xPercent: -140,
+        rotation: -6,
         ease: "power2.in",
-        scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom 30%", scrub: true },
+        scrollTrigger: { trigger: "#hero", start: "25% top", end: "bottom top", scrub: true },
       });
       gsap.to(".hero-fade", {
-        letterSpacing: "0.2em",
+        start: 0,
         opacity: 0,
-        scrollTrigger: { trigger: "#hero", start: "top top", end: "60% top", scrub: true },
+        scrollTrigger: { trigger: "#hero", start: "top top", end: "90% top", scrub: true },
       });
 
       gsap.utils.toArray<HTMLElement>(".reveal").forEach((el) => {
@@ -70,7 +71,6 @@ function Index() {
       // speedometer line fills as you read the steps
       gsap.fromTo(".rev-line", { scaleX: 0 }, { scaleX: 1, ease: "none", scrollTrigger: { trigger: "#process", start: "top 70%", end: "bottom 60%", scrub: true } });
 
-      gsap.to(".road", { backgroundPositionY: "1200px", ease: "none", scrollTrigger: { start: 0, end: "max", scrub: true } });
     }, root);
     return () => ctx.revert();
   }, []);
@@ -86,7 +86,6 @@ function Index() {
 
   return (
     <div ref={root} className="grain relative overflow-x-clip">
-      <div className="road pointer-events-none fixed inset-0" aria-hidden />
       <DrivingCar />
 
       <header className="fixed inset-x-0 top-0 z-40 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 bg-gradient-to-b from-background/90 to-transparent px-5 py-4 md:px-10 md:py-5">
@@ -105,17 +104,27 @@ function Index() {
         <div id="journey">
           {/* HERO */}
           <section id="hero" className="relative flex h-svh flex-col items-center justify-center overflow-hidden">
-            <h1 className="hero-fade pointer-events-none absolute inset-x-0 top-[18svh] select-none text-center font-display font-black uppercase leading-[0.8] md:top-[14svh]">
-              <span className="hero-word block text-[25vw] text-outline md:text-[17vw]">Rubicon</span>
+            <div className="spotlight pointer-events-none absolute inset-0" aria-hidden />
+            <h1 className="hero-fade pointer-events-none absolute inset-x-0 top-[17svh] select-none text-center font-display font-black uppercase leading-[0.8] md:top-[11svh]">
+              <span className="hero-word block text-[44vw] text-outline md:text-[26vw]">Sky</span>
+              <span className="sr-only">Sky Car Rental — Lucknow</span>
             </h1>
-            <img
-              src={jeepFront}
-              alt="Jeep Wrangler Rubicon, front view"
-              width={1024}
-              height={1024}
-              fetchPriority="high"
-              className="hero-car relative z-10 mt-[6svh] w-[min(86vw,560px)] md:mt-[10svh]"
-            />
+            <p className={`${label} hero-word absolute inset-x-0 top-[13svh] text-center text-muted-foreground md:top-[9svh]`}>
+              Self-drive · Lucknow
+            </p>
+            <div className="hero-drive relative z-10 mt-[14svh] w-[min(100vw,820px)] md:mt-[12svh]">
+              <div className="hero-float origin-bottom -rotate-3">
+                <img
+                  src={jeepHero}
+                  alt="Jeep Wrangler Rubicon, three-quarter view"
+                  width={1536}
+                  height={1024}
+                  fetchPriority="high"
+                  className="hero-car w-full"
+                />
+              </div>
+              <div className="car-floor mx-auto -mt-[6%] h-10 w-[80%]" aria-hidden />
+            </div>
             <div className={`${label} hero-fade absolute inset-x-0 bottom-6 flex items-end justify-between px-5 text-muted-foreground md:bottom-8 md:px-10`}>
               <span className="hero-word">Lucknow only<br />From ₹4,500/day</span>
               <span className="hero-word flex flex-col items-center gap-2">
@@ -232,16 +241,16 @@ function Index() {
 
         {/* CTA */}
         <section className="px-5 py-24 text-center md:py-36">
-          <h2 className="reveal font-display text-[18vw] font-black uppercase leading-[0.8] md:text-[11vw]">
+          <h2 className="reveal font-display text-[24vw] font-black uppercase leading-[0.82] md:text-[11vw]">
             Engine's<br /><span className="text-highlight">running.</span>
           </h2>
-          <a href="#book" className={`${label} group mx-auto mt-10 inline-flex h-14 items-center gap-3 bg-primary px-8 text-primary-foreground hover:glow`}>
+          <a href="#book" className={`${label} group mx-auto mt-10 inline-flex h-14 w-full max-w-xs justify-center items-center gap-3 bg-primary px-8 text-primary-foreground hover:glow`}>
             <Tyre spinning={false} className="transition-transform duration-500 group-hover:rotate-[360deg]" /> Book the drive
           </a>
         </section>
 
         <footer className={`${label} flex flex-col justify-between gap-2 border-t border-border px-5 py-6 text-muted-foreground md:flex-row md:px-10`}>
-          <span>Rubicon/LKO — Lucknow, Uttar Pradesh</span>
+          <span>Sky Car Rental — Lucknow, Uttar Pradesh</span>
           <span>Drive easy.</span>
         </footer>
       </main>
