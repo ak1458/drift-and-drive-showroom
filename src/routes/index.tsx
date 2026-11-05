@@ -87,7 +87,7 @@ function Index() {
     <div ref={root} className="grain relative overflow-x-clip">
       <DrivingCar />
 
-      <header className="fixed inset-x-0 top-0 z-40 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 bg-gradient-to-b from-background/90 to-transparent px-5 py-4 md:px-10 md:py-5">
+      <header className="fixed inset-x-0 top-0 z-40 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 bg-background/75 backdrop-blur-md px-5 py-4 md:px-10 md:py-5">
         <Link to="/" className="truncate font-display text-xl font-black uppercase tracking-wide">
           Sky<span className="text-highlight">.</span> <span className="font-mono text-[10px] font-normal tracking-[0.3em] text-muted-foreground">Car Rental</span>
         </Link>
