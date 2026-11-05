@@ -1,330 +1,65 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import body from "@/assets/part-body.png";
-import wheel from "@/assets/part-wheel.png";
-import { DrivingCar } from "@/components/DrivingCar";
+import { ArrowDown, ArrowUpRight, Check, SlidersHorizontal } from "lucide-react";
+import hero from "@/assets/showroom-jeep.jpg";
+import { SiteHeader } from "@/components/SiteHeader";
 import { Booking } from "@/components/Booking";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { Tyre } from "@/components/Tyre";
-import { inr, useFleet } from "@/lib/fleet";
+import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { inr, useFleet } from "@/lib/fleet";
+import { fleetMedia } from "@/lib/fleet-media";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Sky Car Rental — Premium Self-Drive in Lucknow" },
-      { name: "description", content: "Scroll-to-drive car rental in Lucknow. Pick your dates, choose your 4x4, book in seconds." },
-      { property: "og:title", content: "Sky Car Rental — Drive Lucknow" },
-      { property: "og:description", content: "Pick your dates, choose your 4x4, book in seconds. Lucknow only." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: Index,
-});
-
-const label = "font-mono text-[11px] uppercase tracking-[0.25em]";
-
-const STEPS: [string, string][] = [
-  ["Choose", "Pick your dates and vehicle in the booking console. Takes under a minute."],
-  ["Delivered", "We bring the car to your door anywhere in Lucknow, fuelled and detailed."],
-  ["Drive", "Keys in hand. Return it at your door when the trip ends."],
+export const Route=createFileRoute("/")({head:()=>({meta:[{title:"Sky Car Rental — Your Drive, Your Way | Lucknow"},{name:"description",content:"Find your next self-drive in Lucknow. Explore the Sky Car Rental fleet, choose dates and compare daily rental estimates."},{property:"og:title",content:"Sky Car Rental — Your Drive, Your Way"},{property:"og:description",content:"A considered collection of self-drive cars in Lucknow. Find a car that fits your journey."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:Index});
+const faqs=[
+ ["Where does my rental start?","Sky Car Rental is based in Lucknow. Your rental starts and ends in Lucknow; pickup details are agreed when a reservation is arranged."],
+ ["How is the rental estimate calculated?","The displayed daily rate is multiplied by your selected rental days. A same-day trip counts as one day. Deposits, fuel and any additional charges are not included in this estimate."],
+ ["Can I reserve a car on this page?","You can explore cars and calculate a rental estimate here. No payment is taken and no reservation is submitted through this preview."],
+ ["What should I confirm before renting?","Confirm vehicle availability, driving licence requirements, pickup arrangements, deposit, fuel policy and cancellation terms before finalising your rental."]
 ];
-
-const FAQ: [string, string][] = [
-  ["What documents do I need?", "A valid driving licence and a government photo ID (Aadhaar or passport)."],
-  ["Is there a security deposit?", "Yes, a refundable deposit is collected at delivery and returned after the car is checked in."],
-  ["Can I take the car outside Lucknow?", "Bookings start and end in Lucknow. Tell us about outstation plans when you book."],
-  ["What about fuel?", "Cars are delivered with a full tank. Return it full, or we'll refuel at cost."],
-];
-
-function Index() {
-  const root = useRef<HTMLDivElement>(null);
-  const { fleet } = useFleet();
-
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      gsap.from(".hero-word", { yPercent: 40, opacity: 0, duration: 1.2, stagger: 0.08, ease: "power3.out" });
-      gsap.from(".hero-drive", { opacity: 0, x: -60, duration: 1.6, ease: "power3.out" });
-      gsap.from(".studio-light", { opacity: 0, duration: 2.2, ease: "power2.out", delay: 0.3 });
-
-      // engine idle: tiny body rumble, wheels still
-      gsap.to(".hero-body", { y: 1.2, duration: 0.08, yoyo: true, repeat: -1, ease: "none" });
-
-      const wheelR = document.querySelector<HTMLElement>(".hero-wheel-r")!;
-      const puff = (n: number, big = 1) => {
-        const r = wheelR.getBoundingClientRect();
-        if (r.bottom < 0 || r.width === 0) return;
-        window.dispatchEvent(new CustomEvent("smoke:emit", { detail: { x: r.left + r.width * 0.4, y: r.bottom - r.height * 0.08, vx: -160, vy: -25, n, big } }));
-      };
-
-      // scroll: wheels turn with the scroll, rear tyre smokes, car creeps forward then hands over to the drift car
-      let spin = 0;
-      let lastY = window.scrollY;
-      ScrollTrigger.create({
-        trigger: "#hero", start: "top top", end: "bottom top",
-        onUpdate: (st) => {
-          const y = window.scrollY;
-          const d = y - lastY;
-          lastY = y;
-          spin += d * 1.4;
-          gsap.set(".hero-wheel", { rotation: spin });
-          const v = Math.abs(st.getVelocity());
-          if (Math.abs(d) > 0.5 && st.progress < 0.3) puff(Math.min(12, 1 + Math.floor(v / 250)), 1 + Math.min(v / 2000, 1.2));
-        },
-      });
-      gsap.timeline({ scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: 0.4 } })
-        // stays on screen while the page scrolls under it
-        .to(".hero-drive", { y: () => window.innerHeight * 0.55, x: () => window.innerWidth * 0.06, duration: 0.55, ease: "none" }, 0)
-        .to(".hero-body", { rotation: -1.5, duration: 0.2, ease: "power1.out" }, 0)
-        // hand-over: side car melts away as the top-down car fades in at the same spot
-        .to(".hero-drive", { opacity: 0, scale: 0.8, duration: 0.12, ease: "power1.in" }, 0.16);
-
-      // outline word slides opposite to the car
-      gsap.to(".hero-word-big", { xPercent: -25, ease: "none", scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: true } });
-
-      // studio light follows the pointer a little
-      const spot = document.querySelector<HTMLElement>(".spotlight")!;
-      const onMove = (e: PointerEvent) => {
-        if (window.scrollY > window.innerHeight) return;
-        spot.style.setProperty("--sx", `${50 + (e.clientX / window.innerWidth - 0.5) * 30}%`);
-      };
-      window.addEventListener("pointermove", onMove, { passive: true });
-
-      // tap/click the car: rev — wheels spin, rear tyre burns
-      const car = document.querySelector<HTMLElement>(".hero-drive")!;
-      const rev = () => {
-        if (window.scrollY > 40) return;
-        gsap.to(".hero-wheel", { rotation: "+=1080", duration: 1.2, ease: "power2.out", onUpdate: () => void (spin = gsap.getProperty(wheelR, "rotation") as number) });
-        gsap.fromTo(".hero-body", { rotation: -2 }, { rotation: 0, duration: 1, ease: "elastic.out(1,0.4)" });
-        let k = 0;
-        const iv = setInterval(() => { puff(6, 1.4); if (++k > 10) clearInterval(iv); }, 60);
-      };
-      car.addEventListener("click", rev);
-
-      // sections: headlines lean into the scroll
-      gsap.utils.toArray<HTMLElement>(".lean").forEach((el, n) => {
-        gsap.fromTo(el, { xPercent: n % 2 ? -12 : 12, skewX: n % 2 ? 6 : -6 }, { xPercent: n % 2 ? 6 : -6, skewX: 0, ease: "none", scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true } });
-      });
-      // speed strip reacts to scroll velocity
-      const strip = gsap.to(".strip-inner", { xPercent: -50, duration: 18, ease: "none", repeat: -1 });
-      ScrollTrigger.create({ onUpdate: (st) => {
-        const v = st.getVelocity();
-        strip.timeScale(1 + Math.min(Math.abs(v) / 150, 12) * (v < 0 ? -1 : 1));
-        gsap.to(strip, { timeScale: 1, duration: 1, overwrite: true, delay: 0.1 });
-        gsap.to(".strip-inner", { skewX: gsap.utils.clamp(-20, 20, -v / 120), duration: 0.3, overwrite: "auto" });
-      } });
-
-      gsap.to(".hero-fade", {
-        opacity: 0,
-        scrollTrigger: { trigger: "#hero", start: "top top", end: "90% top", scrub: true },
-      });
-
-      gsap.utils.toArray<HTMLElement>(".reveal").forEach((el) => {
-        gsap.from(el, { y: 50, opacity: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 85%" } });
-      });
-
-      // speedometer line fills as you read the steps
-      gsap.fromTo(".rev-line", { scaleX: 0 }, { scaleX: 1, ease: "none", scrollTrigger: { trigger: "#process", start: "top 70%", end: "bottom 60%", scrub: true } });
-
-      return () => { window.removeEventListener("pointermove", onMove); car.removeEventListener("click", rev); };
-
-    }, root);
-    return () => ctx.revert();
-  }, []);
-
-  // reveal cards that mount after fleet loads
-  useEffect(() => {
-    const t = gsap.fromTo(".fleet-card", { y: 40, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.08, duration: 0.8, ease: "power3.out", scrollTrigger: { trigger: "#garage", start: "top 75%" } });
-    return () => {
-      t.scrollTrigger?.kill();
-      t.kill();
-    };
-  }, [fleet.length]);
-
-  return (
-    <div ref={root} className="grain relative overflow-x-clip">
-      <DrivingCar />
-
-      <header className="fixed inset-x-0 top-0 z-40 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 bg-background/75 backdrop-blur-md px-5 py-4 md:px-10 md:py-5">
-        <Link to="/" className="truncate font-display text-xl font-black uppercase tracking-wide">
-          Sky<span className="text-highlight">.</span> <span className="font-mono text-[10px] font-normal tracking-[0.3em] text-muted-foreground">Car Rental</span>
-        </Link>
-        <nav className="flex shrink-0 items-center gap-4 md:gap-6">
-          <a href="#garage" className={`${label} hidden text-muted-foreground hover:text-highlight sm:inline`}>Fleet</a>
-          <a href="#faq" className={`${label} hidden text-muted-foreground hover:text-highlight sm:inline`}>FAQ</a>
-          <ThemeToggle />
-          <a href="#book" className={`${label} flex h-9 items-center bg-primary px-3 text-primary-foreground`}>Book</a>
-        </nav>
-      </header>
-
-      <main className="relative z-10">
-        <div id="journey">
-          {/* HERO */}
-          <section id="hero" className="relative flex h-svh flex-col items-center justify-center">
-            <div className="spotlight pointer-events-none absolute inset-0" aria-hidden />
-            <h1 className="hero-fade pointer-events-none absolute inset-x-0 top-[17svh] select-none text-center font-display font-black uppercase leading-[0.8] md:top-[11svh]">
-              <span className="hero-word hero-word-big block text-[44vw] text-outline md:text-[26vw]">Sky</span>
-              <span className="sr-only">Sky Car Rental — Lucknow</span>
-            </h1>
-            <p className={`${label} hero-word absolute inset-x-0 top-[13svh] text-center text-muted-foreground md:top-[9svh]`}>
-              Self-drive · Lucknow
-            </p>
-            <div className="studio-light pointer-events-none absolute inset-x-0 top-0 h-[80svh]" aria-hidden />
-            <div className="hero-drive relative z-10 mt-[22svh] w-[min(94vw,880px)] cursor-pointer md:mt-[24svh]" title="Tap to rev">
-              <div className="hero-body relative aspect-[2/1] origin-bottom">
-                <img src={body} alt="Jeep Wrangler Rubicon, side view" width={1536} height={768} fetchPriority="high" className="hero-shade absolute inset-0 w-full" />
-                <img src={wheel} alt="" width={816} height={816} className="hero-wheel hero-wheel-r hero-shade absolute left-[8.5%] top-[49.5%] w-[22%]" />
-                <img src={wheel} alt="" width={816} height={816} className="hero-wheel hero-wheel-f hero-shade absolute left-[72%] top-[49.5%] w-[22%]" />
-              </div>
-              <div className="car-floor mx-auto -mt-[1%] h-8 w-[90%]" aria-hidden />
-            </div>
-            <div className={`${label} hero-fade absolute inset-x-0 bottom-6 flex items-end justify-between px-5 text-muted-foreground md:bottom-8 md:px-10`}>
-              <span className="hero-word">Lucknow only<br />From ₹4,500/day</span>
-              <span className="hero-word flex flex-col items-center gap-2">
-                Scroll
-                <span className="h-10 w-px animate-pulse bg-primary" />
-              </span>
-              <span className="hero-word text-right">4×4 · Delivered<br />to your door</span>
-            </div>
-          </section>
-
-          {/* 01 — car swings left; copy right (bottom on phones) */}
-          <section className="flex h-svh items-end justify-end px-5 pb-[10svh] md:items-center md:px-16 md:pb-0">
-            <div className="reveal max-w-md">
-              <p className={`${label} text-highlight`}>01 — Arrival</p>
-              <h2 className="lean mt-4 font-display text-[15vw] font-black uppercase leading-[0.85] md:text-8xl">
-                It doesn't park.<br />It arrives.
-              </h2>
-              <p className="mt-5 text-muted-foreground">Delivered to your door anywhere in Lucknow — Gomti Nagar to Hazratganj — fuelled, detailed, ready.</p>
-            </div>
-          </section>
-
-          {/* 02 — car swings right; copy left */}
-          <section className="flex h-svh items-end px-5 pb-[8svh] md:items-center md:px-16 md:pb-0">
-            <div className="reveal w-full max-w-lg">
-              <p className={`${label} text-highlight`}>02 — Machine</p>
-              <h2 className="lean mt-4 font-display text-[15vw] font-black uppercase leading-[0.85] md:text-8xl">Built for<br />every road.</h2>
-              <dl className="mt-6 grid grid-cols-2 gap-x-6 gap-y-5 font-mono md:mt-8">
-                {[
-                  ["Engine", "2.0L Turbo"],
-                  ["Drive", "4×4 Rock-Trac"],
-                  ["Gearbox", "8-speed auto"],
-                  ["Seats", "5 adults"],
-                ].map(([k, v]) => (
-                  <div key={k as string} className="border-t border-border pt-3">
-                    <dt className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground md:text-[11px]">{k}</dt>
-                    <dd className="mt-1 text-base md:text-lg">{v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </section>
-        </div>
-
-        {/* 03 — BOOKING: car parks left (top on phones) */}
-        <section id="book" className="flex min-h-svh scroll-mt-0 items-start justify-center px-5 pb-16 pt-[40svh] md:items-center md:justify-end md:px-16 md:pt-24">
-          <div className="w-full max-w-md">
-            <p className={`${label} mb-4 text-highlight`}>03 — Your drive</p>
-            <Booking />
-          </div>
-        </section>
-
-        <div className="overflow-hidden border-y border-border py-5" aria-hidden>
-          <div className="strip-inner flex w-max gap-10 whitespace-nowrap font-display text-5xl font-black uppercase md:text-7xl">
-            {Array.from({ length: 2 }).map((_, k) => (
-              <span key={k} className="flex gap-10">
-                {["Lucknow", "Self-drive", "Delivered", "4×4", "Full tank", "Sky Car Rental"].map((w) => (
-                  <span key={w} className="flex items-center gap-10"><span className="text-outline">{w}</span><span className="text-highlight">✦</span></span>
-                ))}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* 04 — GARAGE */}
-        <section id="garage" className="px-5 py-24 md:px-16 md:py-32">
-          <div className="reveal flex items-end justify-between gap-6">
-            <div className="min-w-0">
-              <p className={`${label} text-highlight`}>04 — The garage</p>
-              <h2 className="lean mt-4 font-display text-[14vw] font-black uppercase leading-[0.85] md:text-8xl">Pick your<br />machine.</h2>
-            </div>
-            <Link to="/fleet" className={`${label} hidden shrink-0 text-muted-foreground hover:text-highlight md:inline`}>Manage fleet →</Link>
-          </div>
-          <div className="-mx-5 mt-10 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-4 md:mx-0 md:grid md:grid-cols-3 md:gap-px md:overflow-visible md:bg-border md:px-0 md:pb-0 lg:grid-cols-5">
-            {fleet.map((v, idx) => (
-              <a
-                key={v.id}
-                href="#book"
-                onPointerMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); gsap.to(e.currentTarget, { rotationY: ((e.clientX - r.left) / r.width - 0.5) * 14, rotationX: -((e.clientY - r.top) / r.height - 0.5) * 14, transformPerspective: 700, duration: 0.4 }); }}
-                onPointerLeave={(e) => gsap.to(e.currentTarget, { rotationX: 0, rotationY: 0, duration: 0.6, ease: "elastic.out(1,0.5)" })}
-                className="fleet-card group relative flex w-[72vw] shrink-0 snap-start flex-col justify-between border border-border bg-background p-5 transition-colors hover:bg-secondary md:w-auto md:border-0"
-              >
-                <span className="font-mono text-xs text-muted-foreground">{String(idx + 1).padStart(2, "0")}</span>
-                <div className="mt-16">
-                  <p className="font-display text-3xl font-extrabold uppercase leading-none">{v.name}</p>
-                  <p className="mt-2 font-mono text-xs text-muted-foreground">{v.type} · {v.seats} seats</p>
-                  <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
-                    <span className="font-mono text-sm text-highlight">{inr(v.pricePerDay)}<span className="text-muted-foreground">/day</span></span>
-                    <Tyre spinning={false} className="text-muted-foreground transition-transform duration-700 group-hover:rotate-[360deg] group-hover:text-highlight" />
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
-        </section>
-
-        {/* 05 — PROCESS */}
-        <section id="process" className="px-5 py-24 md:px-16 md:py-32">
-          <p className={`${label} reveal text-highlight`}>05 — How it works</p>
-          <div className="relative mt-10">
-            <div className="rev-line absolute left-0 top-0 h-px w-full origin-left bg-primary" />
-            <div className="grid gap-10 pt-8 md:grid-cols-3 md:gap-8">
-              {STEPS.map(([t, d], idx) => (
-                <div key={t} className="reveal">
-                  <span className="font-mono text-xs text-muted-foreground">Gear {idx + 1}</span>
-                  <h3 className="mt-2 font-display text-5xl font-black uppercase">{t}</h3>
-                  <p className="mt-3 max-w-xs text-muted-foreground">{d}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* 06 — FAQ */}
-        <section id="faq" className="grid gap-10 px-5 py-24 md:grid-cols-[1fr_1.4fr] md:px-16 md:py-32">
-          <div className="reveal">
-            <p className={`${label} text-highlight`}>06 — Before you drive</p>
-            <h2 className="lean mt-4 font-display text-[14vw] font-black uppercase leading-[0.85] md:text-7xl">Questions.</h2>
-          </div>
-          <Accordion type="single" collapsible className="reveal border-t border-border">
-            {FAQ.map(([q, a]) => (
-              <AccordionItem key={q} value={q} className="border-border">
-                <AccordionTrigger className="py-5 text-left text-base hover:no-underline">{q}</AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">{a}</AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </section>
-
-        {/* CTA */}
-        <section className="px-5 py-24 text-center md:py-36">
-          <h2 className="reveal font-display text-[24vw] font-black uppercase leading-[0.82] md:text-[11vw]">
-            Engine's<br /><span className="text-highlight">running.</span>
-          </h2>
-          <a href="#book" className={`${label} group mx-auto mt-10 inline-flex h-14 w-full max-w-xs justify-center items-center gap-3 bg-primary px-8 text-primary-foreground hover:glow`}>
-            <Tyre spinning={false} className="transition-transform duration-500 group-hover:rotate-[360deg]" /> Book the drive
-          </a>
-        </section>
-
-        <footer className={`${label} flex flex-col justify-between gap-2 border-t border-border px-5 py-6 text-muted-foreground md:flex-row md:px-10`}>
-          <span>Sky Car Rental — Lucknow, Uttar Pradesh</span>
-          <span>Drive easy.</span>
-        </footer>
-      </main>
+function Index(){
+ const root=useRef<HTMLDivElement>(null);
+ const {fleet}=useFleet();
+ const [filter,setFilter]=useState("All cars");
+ const [selected,setSelected]=useState("");
+ const visible=fleet.filter(v=>filter==="All cars"||(filter==="5 seats"?v.seats===5:v.seats>=7));
+ useEffect(()=>{
+  gsap.registerPlugin(ScrollTrigger);
+  const mm=gsap.matchMedia();
+  mm.add("(prefers-reduced-motion: no-preference)",()=>{
+   const ctx=gsap.context(()=>{
+    gsap.timeline({defaults:{ease:"power3.out"}}).from(".hero-photo",{scale:1.065,duration:1.6}).from(".load-reveal",{y:24,opacity:0,duration:.85,stagger:.1},.2);
+    gsap.utils.toArray<HTMLElement>(".editorial-reveal").forEach(el=>gsap.from(el,{y:28,opacity:0,duration:.8,scrollTrigger:{trigger:el,start:"top 91%",once:true}}));
+   },root);
+   return()=>ctx.revert();
+  });return()=>mm.revert();
+ },[]);
+ const choose=(id:string)=>{setSelected(id);document.getElementById("book")?.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});};
+ return <div ref={root}>
+  <SiteHeader/>
+  <main>
+   <section className="hero-stage">
+    <img src={hero} alt="Graphite Jeep Wrangler in a softly lit concrete showroom" width={1920} height={1024} fetchPriority="high" className="hero-photo"/>
+    <div className="page-width hero-content">
+     <p className="load-reveal eyebrow flex items-center gap-2"><span className="size-1.5 rounded-full bg-primary"/> Self-drive car rental · Lucknow</p>
+     <h1 className="load-reveal hero-title font-display">SKY CAR RENTAL<span className="mt-2 block text-primary">YOUR DRIVE.<br/>YOUR WAY.</span></h1>
+     <p className="load-reveal mt-5 max-w-[245px] text-base text-hero-foreground/75">A city to explore. A road to take.<br/>A car that feels like you.</p>
+     <Button asChild variant="outline" className="load-reveal mt-7 h-11 border-hero-foreground/40 bg-transparent text-hero-foreground hover:bg-hero-foreground hover:text-hero"><a href="#garage">Explore the fleet <ArrowUpRight/></a></Button>
     </div>
-  );
+    <div className="hero-caption"><div className="page-width load-reveal flex items-end justify-between gap-4"><a href="#garage" className="flex items-center gap-3 text-xs"><ArrowDown size={16}/> Take a closer look</a><div className="text-right"><p className="eyebrow text-hero-foreground/60">In the spotlight</p><p className="mt-1 text-sm">Jeep Wrangler Rubicon <span className="ml-2 text-primary">01 / 05</span></p></div></div></div>
+   </section>
+   <section id="book" className="booking-band"><div className="page-width"><Booking selectedVehicle={selected}/></div></section>
+   <section id="garage" className="page-width section-space">
+    <div className="editorial-reveal flex flex-wrap items-end justify-between gap-6"><div><p className="eyebrow text-muted-foreground">01 / The collection</p><h2 className="section-title mt-4 font-display">A GOOD DRIVE<br/>STARTS HERE.</h2></div><p className="max-w-[280px] text-sm leading-relaxed text-muted-foreground">For the everyday escape or the long way home. Find the right car for your kind of journey.</p></div>
+    <div className="mt-9 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5"><div className="flex gap-2" role="group" aria-label="Filter vehicles">{["All cars","5 seats","7+ seats"].map(f=><Button key={f} variant={filter===f?"secondary":"ghost"} aria-pressed={filter===f} onClick={()=>setFilter(f)} className="h-9 text-xs">{f}{filter===f&&<Check size={12}/>}</Button>)}</div><Button asChild variant="ghost" className="text-xs text-muted-foreground"><Link to="/fleet"><SlidersHorizontal/> Manage fleet</Link></Button></div>
+    <div className="mt-7 grid gap-x-6 gap-y-10 md:grid-cols-3">
+     {visible.map((v,i)=><article key={v.id} className="fleet-item min-w-0"><div className="relative overflow-hidden bg-secondary">{fleetMedia[v.id]?<img src={fleetMedia[v.id]} alt={v.name} width={1024} height={768} loading="lazy" className="fleet-photo"/>:<div className="flex aspect-[4/3] items-center justify-center font-display text-4xl">{v.name}</div>}<span className="absolute left-4 top-4 text-[11px] text-hero-foreground">{String(i+1).padStart(2,"0")}</span></div><div className="mt-5 flex items-start justify-between gap-3"><div className="min-w-0"><p className="eyebrow text-muted-foreground">{v.type} · {v.seats} seats</p><h3 className="mt-2 font-display text-2xl leading-tight">{v.name}</h3></div><Button size="icon" variant="outline" aria-label={`Choose ${v.name}`} onClick={()=>choose(v.id)}><ArrowUpRight/></Button></div><div className="mt-4 flex items-center justify-between border-t border-border pt-4"><span className="text-sm"><strong className="font-medium">{inr(v.pricePerDay)}</strong><span className="text-muted-foreground"> / day</span></span><Button variant="link" onClick={()=>choose(v.id)} className="h-auto p-0 text-xs text-foreground">Choose this car</Button></div></article>)}
+    </div>{!visible.length&&<p className="py-10 text-muted-foreground">No cars in this selection.</p>}
+   </section>
+   <section id="approach" className="approach-band section-space"><div className="page-width"><div className="editorial-reveal flex flex-wrap justify-between gap-8"><div><p className="eyebrow">02 / The Sky way</p><h2 className="section-title mt-4 font-display">LESS FUSS.<br/>MORE OPEN ROAD.</h2></div><p className="max-w-[330px] text-lg leading-relaxed">The best part of renting a car?<br/>Making the journey your own.</p></div><div className="mt-12 grid gap-8 md:grid-cols-3">{[["01","Find your fit","Compare our collection by space, style and daily rate."],["02","Make it your trip","Choose your dates and see your rental estimate upfront."],["03","Make a plan","Confirm availability and pickup details before your drive."]].map(([n,title,copy])=><div key={n} className="editorial-reveal approach-rule border-t pt-5"><span className="text-xs">{n}</span><h3 className="mt-5 font-display text-3xl">{title}</h3><p className="mt-3 max-w-[280px] text-sm leading-relaxed">{copy}</p></div>)}</div></div></section>
+   <section id="questions" className="page-width section-space grid gap-10 md:grid-cols-[1fr_1.25fr]"><div className="editorial-reveal"><p className="eyebrow text-muted-foreground">03 / Before you go</p><h2 className="section-title mt-4 font-display">GOOD TO<br/>KNOW.</h2><p className="mt-5 max-w-xs text-sm text-muted-foreground">A little clarity before the journey begins.</p></div><Accordion type="single" collapsible className="editorial-reveal border-t border-border">{faqs.map(([q,a],i)=><AccordionItem key={q} value={q}><AccordionTrigger className="gap-5 py-6 text-left text-base font-normal hover:no-underline"><span className="flex gap-5"><span className="text-xs text-muted-foreground">0{i+1}</span>{q}</span></AccordionTrigger><AccordionContent className="pl-8 text-sm leading-relaxed text-muted-foreground">{a}</AccordionContent></AccordionItem>)}</Accordion></section>
+  </main>
+  <footer className="border-t border-border"><div className="page-width py-10"><div className="flex flex-wrap items-center justify-between gap-5"><p className="eyebrow text-muted-foreground">Lucknow, Uttar Pradesh · India</p><Button asChild><a href="#book">Find your next drive <ArrowUpRight/></a></Button></div><div className="my-9 flex flex-wrap items-end justify-between gap-6"><p className="footer-word font-display">SKY<span className="text-highlight">/</span></p><p className="text-sm text-muted-foreground">Your drive. Your way.</p></div><div className="flex justify-between border-t border-border pt-5 text-xs text-muted-foreground"><span>© 2026 Sky Car Rental</span><a href="#garage">Back to the collection ↑</a></div></div></footer>
+ </div>;
 }
