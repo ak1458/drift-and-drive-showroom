@@ -76,6 +76,7 @@ function Index() {
 
       // pointer / tilt: car follows the cursor in 3D
       const tilt = document.querySelector<HTMLElement>(".hero-tilt")!;
+      gsap.set(tilt, { transformPerspective: 900 });
       const rx = gsap.quickTo(tilt, "rotationX", { duration: 0.8, ease: "power3" });
       const ry = gsap.quickTo(tilt, "rotationY", { duration: 0.8, ease: "power3" });
       const tx = gsap.quickTo(tilt, "x", { duration: 0.8, ease: "power3" });
