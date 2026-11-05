@@ -98,6 +98,7 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-weight: 300;
     -webkit-font-smoothing: antialiased;
   }
   ::selection {
@@ -112,7 +113,7 @@
 
 /* Soft spotlight behind the hero car */
 @utility spotlight {
-  background: radial-gradient(60% 50% at 50% 55%, var(--spot), transparent 70%);
+  background: radial-gradient(60% 50% at var(--sx, 50%) var(--sy, 55%), var(--spot), transparent 70%);
 }
 @utility car-floor {
   background: radial-gradient(50% 50% at 50% 50%, color-mix(in oklab, var(--foreground) 22%, transparent), transparent 70%);
