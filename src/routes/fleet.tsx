@@ -1,98 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { ArrowLeft, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { inr, useFleet } from "@/lib/fleet";
-import { Tyre } from "@/components/Tyre";
-import { ThemeToggle } from "@/components/ThemeToggle";
-
-export const Route = createFileRoute("/fleet")({
-  head: () => ({
-    meta: [
-      { title: "Fleet — Sky Car Rental Lucknow" },
-      { name: "description", content: "Add or remove the vehicles offered for rent in Lucknow." },
-      { property: "og:title", content: "Fleet — Sky Car Rental" },
-      { property: "og:description", content: "Manage the vehicles available for booking." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
-  component: FleetPage,
-});
-
-const field =
-  "w-full border border-border bg-transparent px-3 py-2.5 font-mono text-sm outline-none transition-colors focus:border-primary";
-
-function FleetPage() {
-  const { fleet, add, remove, reset } = useFleet();
-  const [form, setForm] = useState({ name: "", type: "SUV", seats: "5", pricePerDay: "" });
-  const [err, setErr] = useState("");
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const price = Number(form.pricePerDay);
-    const seats = Number(form.seats);
-    if (!form.name.trim()) return setErr("Give the vehicle a name.");
-    if (!price || price <= 0) return setErr("Enter a daily price.");
-    add({ name: form.name.trim(), type: form.type.trim() || "Car", seats: seats || 5, pricePerDay: price });
-    setForm({ name: "", type: "SUV", seats: "5", pricePerDay: "" });
-    setErr("");
-  };
-
-  return (
-    <div className="min-h-svh px-5 py-6 md:px-16">
-      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
-        <Link to="/" className="font-display text-xl font-black uppercase">
-          Sky<span className="text-highlight">.</span> <span className="font-mono text-[10px] font-normal tracking-[0.3em] text-muted-foreground">Car Rental</span>
-        </Link>
-        <div className="flex shrink-0 items-center gap-4">
-        <ThemeToggle />
-        <Link to="/" hash="book" className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-highlight">
-          ← Back
-        </Link>
-        </div>
-      </header>
-
-      <h1 className="mt-16 font-display text-[17vw] font-black uppercase leading-[0.85] md:text-9xl">The garage.</h1>
-      <p className="mt-4 max-w-md text-muted-foreground">Add or remove the vehicles customers can book. Changes appear in the booking console right away.</p>
-
-      <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_380px]">
-        <ul className="divide-y divide-border border-y border-border">
-          {fleet.map((v, idx) => (
-            <li key={v.id} className="flex items-center gap-4 py-4">
-              <span className="font-mono text-xs text-muted-foreground">{String(idx + 1).padStart(2, "0")}</span>
-              <div className="flex-1">
-                <p className="font-display text-2xl font-extrabold uppercase">{v.name}</p>
-                <p className="font-mono text-xs text-muted-foreground">
-                  {v.type} · {v.seats} seats · {inr(v.pricePerDay)}/day
-                </p>
-              </div>
-              <button
-                onClick={() => remove(v.id)}
-                className="border border-border px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
-              >
-                Remove
-              </button>
-            </li>
-          ))}
-          {fleet.length === 0 && <li className="py-6 text-muted-foreground">Garage is empty.</li>}
-        </ul>
-
-        <form onSubmit={submit} className="h-fit space-y-3 border border-border bg-card p-6">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-highlight">Add vehicle</p>
-          <input className={field} placeholder="Name e.g. Tata Harrier" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <input className={field} placeholder="Type e.g. SUV" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} />
-          <div className="grid grid-cols-2 gap-3">
-            <input className={field} type="number" min={1} placeholder="Seats" value={form.seats} onChange={(e) => setForm({ ...form, seats: e.target.value })} />
-            <input className={field} type="number" min={1} placeholder="₹ / day" value={form.pricePerDay} onChange={(e) => setForm({ ...form, pricePerDay: e.target.value })} />
-          </div>
-          {err && <p className="font-mono text-xs text-destructive">{err}</p>}
-          <button className="group flex w-full items-center justify-center gap-3 bg-primary py-3 font-mono text-xs uppercase tracking-[0.25em] text-primary-foreground hover:glow">
-            <Tyre spinning={false} className="transition-transform duration-500 group-hover:rotate-[360deg]" /> Add to fleet
-          </button>
-          <button type="button" onClick={reset} className="w-full py-2 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground">
-            Restore default fleet
-          </button>
-        </form>
-      </div>
-    </div>
-  );
+import { fleetMedia } from "@/lib/fleet-media";
+import { SiteHeader } from "@/components/SiteHeader";
+import { Button } from "@/components/ui/button";
+export const Route=createFileRoute("/fleet")({head:()=>({meta:[{title:"Manage the Collection — Sky Car Rental Lucknow"},{name:"description",content:"Add and remove cars from the Sky Car Rental collection and update your local daily rental rates."},{property:"og:title",content:"The Collection — Sky Car Rental"},{property:"og:description",content:"Manage your collection of self-drive vehicles in Lucknow."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}]}),component:FleetPage});
+const field="w-full border-b border-border bg-transparent py-3 text-sm outline-none focus:border-highlight";
+function FleetPage(){
+ const {fleet,add,remove,reset}=useFleet();
+ const [form,setForm]=useState({name:"",type:"SUV",seats:"5",pricePerDay:""});const [err,setErr]=useState("");
+ const submit=(e:React.FormEvent)=>{e.preventDefault();const price=Number(form.pricePerDay);const seats=Number(form.seats);if(!form.name.trim())return setErr("Give the vehicle a name.");if(!price||price<=0)return setErr("Enter a daily price.");add({name:form.name.trim(),type:form.type.trim()||"Car",seats:seats||5,pricePerDay:price});setForm({name:"",type:"SUV",seats:"5",pricePerDay:""});setErr("");};
+ return <><SiteHeader/><main className="page-width section-space"><Button asChild variant="ghost" className="mb-8 pl-0"><Link to="/" hash="garage"><ArrowLeft/> Back to the collection</Link></Button><p className="eyebrow text-muted-foreground">Your showroom</p><h1 className="section-title mt-4 font-display">THE COLLECTION.</h1><p className="mt-4 text-sm text-muted-foreground">Changes are saved in this browser only.</p><div className="mt-12 grid gap-12 lg:grid-cols-[1.6fr_1fr]"><ul className="divide-y divide-border border-t border-border">{fleet.map(v=><li key={v.id} className="flex items-center gap-4 py-5">{fleetMedia[v.id]&&<img src={fleetMedia[v.id]} alt={v.name} width={1024} height={768} className="h-20 w-24 object-cover" loading="lazy"/>}<div className="min-w-0 flex-1"><h2 className="font-display text-2xl leading-tight">{v.name}</h2><p className="mt-1 text-xs text-muted-foreground">{v.type} · {v.seats} seats · {inr(v.pricePerDay)}/day</p></div><Button size="icon" variant="ghost" aria-label={`Remove ${v.name}`} onClick={()=>remove(v.id)} className="text-muted-foreground hover:text-destructive"><Trash2/></Button></li>)}{!fleet.length&&<li className="py-8 text-muted-foreground">Your collection is empty.</li>}</ul><form onSubmit={submit} className="space-y-5 border-t border-border pt-6"><h2 className="font-display text-3xl">ADD A CAR.</h2><label className="block text-xs text-muted-foreground">Vehicle name<input required className={field} value={form.name} placeholder="e.g. Tata Harrier" onChange={e=>setForm({...form,name:e.target.value})}/></label><label className="block text-xs text-muted-foreground">Category<input className={field} value={form.type} onChange={e=>setForm({...form,type:e.target.value})}/></label><div className="grid grid-cols-2 gap-5"><label className="text-xs text-muted-foreground">Seats<input required type="number" min={1} className={field} value={form.seats} onChange={e=>setForm({...form,seats:e.target.value})}/></label><label className="text-xs text-muted-foreground">Daily rate (₹)<input required type="number" min={1} className={field} value={form.pricePerDay} onChange={e=>setForm({...form,pricePerDay:e.target.value})}/></label></div>{err&&<p role="alert" className="text-sm text-destructive">{err}</p>}<Button type="submit" className="w-full"><Plus/> Add to collection</Button><Button type="button" variant="ghost" onClick={reset} className="w-full text-muted-foreground"><RotateCcw/> Restore default collection</Button></form></div></main></>;
 }

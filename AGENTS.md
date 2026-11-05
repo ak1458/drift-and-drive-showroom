@@ -9,5 +9,6 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- The scrolling car + smoke live in one fixed layer (src/components/DrivingCar.tsx) driven by a single ScrollTrigger timeline on #journey; booking talks to it via window events `car:launch` / `car:return` so sections never own the car.
+- The showroom uses photographic full-width sections and scoped GSAP reveals with reduced-motion support; the superseded fixed driving-car layer is not mounted.
+- Shared navigation and fleet imagery are browser-safe modules; booking is a local rental estimate, not a submitted reservation, until a backend is added.
 - Fleet is stored in browser localStorage (src/lib/fleet.ts) until a backend is added; pricing/day rules live there and are covered by src/test/fleet.test.ts.
