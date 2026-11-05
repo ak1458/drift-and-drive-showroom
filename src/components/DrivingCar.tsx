@@ -27,7 +27,7 @@ export function DrivingCar() {
     const vh = () => window.innerHeight / 100;
 
     // --- scroll path -------------------------------------------------------
-    gsap.set(o, { xPercent: -50, yPercent: -50, x: () => 6 * vw(), y: () => 8 * vh(), rotation: 90, opacity: 0, scale: 0.85 });
+    gsap.set(o, { xPercent: -50, yPercent: -50, x: () => 6 * vw(), y: () => 2 * vh(), rotation: 90, opacity: 0, scale: 0.85 });
     const tl = gsap.timeline({
       scrollTrigger: { trigger: "#journey", start: "top top", end: "bottom top", scrub: 1.2, invalidateOnRefresh: true },
     });

@@ -73,7 +73,7 @@ function Index() {
           spin += d * 1.4;
           gsap.set(".hero-wheel", { rotation: spin });
           const v = Math.abs(st.getVelocity());
-          if (Math.abs(d) > 0.5 && st.progress < 0.42) puff(Math.min(12, 1 + Math.floor(v / 250)), 1 + Math.min(v / 2000, 1.2));
+          if (Math.abs(d) > 0.5 && st.progress < 0.3) puff(Math.min(12, 1 + Math.floor(v / 250)), 1 + Math.min(v / 2000, 1.2));
         },
       });
       gsap.timeline({ scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: 0.4 } })
@@ -81,7 +81,7 @@ function Index() {
         .to(".hero-drive", { y: () => window.innerHeight * 0.55, x: () => window.innerWidth * 0.06, duration: 0.55, ease: "none" }, 0)
         .to(".hero-body", { rotation: -1.5, duration: 0.2, ease: "power1.out" }, 0)
         // hand-over: side car melts away as the top-down car fades in at the same spot
-        .to(".hero-drive", { opacity: 0, scale: 0.8, duration: 0.15, ease: "power1.in" }, 0.3);
+        .to(".hero-drive", { opacity: 0, scale: 0.8, duration: 0.12, ease: "power1.in" }, 0.16);
 
       // outline word slides opposite to the car
       gsap.to(".hero-word-big", { xPercent: -25, ease: "none", scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: true } });
