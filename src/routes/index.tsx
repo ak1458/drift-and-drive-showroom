@@ -4,7 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import jeepHero from "@/assets/jeep-hero.png";
 import { DrivingCar } from "@/components/DrivingCar";
-import { AmbientField } from "@/components/AmbientField";
+import { Breakdown } from "@/components/Breakdown";
 import { Booking } from "@/components/Booking";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Tyre } from "@/components/Tyre";
@@ -50,6 +50,13 @@ function Index() {
       gsap.from(".hero-car", { y: 80, scale: 0.85, opacity: 0, duration: 1.4, ease: "power3.out" });
       gsap.from(".hero-word", { yPercent: 40, opacity: 0, duration: 1.2, stagger: 0.08, ease: "power3.out" });
 
+      // road rushing past under the car
+      gsap.utils.toArray<HTMLElement>(".streak").forEach((el, k) => {
+        gsap.fromTo(el, { xPercent: -120, left: "100%" }, { left: "-40%", duration: 0.6 + (k % 4) * 0.25, ease: "none", repeat: -1, delay: k * 0.13 });
+      });
+      // suspension bounce over the road + slight wander
+      gsap.to(".hero-car", { y: -3, duration: 0.18, yoyo: true, repeat: -1, ease: "sine.inOut" });
+      gsap.to(".hero-tilt", { xPercent: 2, duration: 2.6, yoyo: true, repeat: -1, ease: "sine.inOut" });
       // idle: engine running, body gently rocking
       gsap.to(".hero-float", { y: -6, rotation: -0.8, duration: 1.4, yoyo: true, repeat: -1, ease: "sine.inOut" });
       // hero car stays put at first, then drives off to the left
@@ -102,7 +109,7 @@ function Index() {
       };
       car.addEventListener("click", rev);
       // gentle exhaust while idling
-      const idle = setInterval(() => { if (window.scrollY < 40 && !document.hidden) puff(1, 0.6); }, 450);
+      const idle = setInterval(() => { if (window.scrollY < 40 && !document.hidden) puff(2, 0.8); }, 260);
 
       // sections: headlines lean into the scroll
       gsap.utils.toArray<HTMLElement>(".lean").forEach((el, n) => {
@@ -145,7 +152,6 @@ function Index() {
 
   return (
     <div ref={root} className="grain relative overflow-x-clip">
-      <AmbientField />
       <DrivingCar />
 
       <header className="fixed inset-x-0 top-0 z-40 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 bg-background/75 backdrop-blur-md px-5 py-4 md:px-10 md:py-5">
@@ -172,6 +178,11 @@ function Index() {
             <p className={`${label} hero-word absolute inset-x-0 top-[13svh] text-center text-muted-foreground md:top-[9svh]`}>
               Self-drive · Lucknow
             </p>
+            <div className="streaks pointer-events-none absolute inset-x-0 top-[62svh] h-[22svh] md:top-[58svh]" aria-hidden>
+              {Array.from({ length: 9 }).map((_, k) => (
+                <span key={k} className="streak absolute h-px bg-gradient-to-l from-transparent via-foreground/40 to-transparent" style={{ top: `${(k * 37) % 100}%`, width: `${18 + ((k * 23) % 30)}%` }} />
+              ))}
+            </div>
             <div className="hero-drive relative z-10 mt-[14svh] w-[min(100vw,720px)] md:mt-[16svh]">
               <div className="hero-tilt [transform-style:preserve-3d]" style={{ perspective: 900 }}>
               <div className="hero-float relative origin-bottom -rotate-3">
@@ -251,6 +262,8 @@ function Index() {
             ))}
           </div>
         </div>
+
+        <Breakdown />
 
         {/* 04 — GARAGE */}
         <section id="garage" className="px-5 py-24 md:px-16 md:py-32">
