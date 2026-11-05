@@ -26,13 +26,13 @@ export const Route = createFileRoute("/")({
 
 const label = "font-mono text-[11px] uppercase tracking-[0.25em]";
 
-const STEPS = [
+const STEPS: [string, string][] = [
   ["Choose", "Pick your dates and vehicle in the booking console. Takes under a minute."],
   ["Delivered", "We bring the car to your door anywhere in Lucknow, fuelled and detailed."],
   ["Drive", "Keys in hand. Return it at your door when the trip ends."],
 ];
 
-const FAQ = [
+const FAQ: [string, string][] = [
   ["What documents do I need?", "A valid driving licence and a government photo ID (Aadhaar or passport)."],
   ["Is there a security deposit?", "Yes, a refundable deposit is collected at delivery and returned after the car is checked in."],
   ["Can I take the car outside Lucknow?", "Bookings start and end in Lucknow. Tell us about outstation plans when you book."],
@@ -149,7 +149,7 @@ function Index() {
                   ["Gearbox", "8-speed auto"],
                   ["Seats", "5 adults"],
                 ].map(([k, v]) => (
-                  <div key={k} className="bg-background p-3 md:p-4">
+                  <div key={k as string} className="bg-background p-3 md:p-4">
                     <dt className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground md:text-[11px]">{k}</dt>
                     <dd className="mt-1 text-base md:text-lg">{v}</dd>
                   </div>
