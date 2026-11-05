@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { inr, useFleet } from "@/lib/fleet";
 import { Tyre } from "@/components/Tyre";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const Route = createFileRoute("/fleet")({
   head: () => ({
@@ -37,17 +38,20 @@ function FleetPage() {
   };
 
   return (
-    <div className="road-grid min-h-screen px-6 py-8 md:px-16">
-      <header className="flex items-center justify-between">
+    <div className="road-grid min-h-svh px-5 py-6 md:px-16">
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
         <Link to="/" className="font-display text-xl font-black uppercase">
           Rubicon<span className="text-primary">/</span>LKO
         </Link>
+        <div className="flex shrink-0 items-center gap-4">
+        <ThemeToggle />
         <Link to="/" hash="book" className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-primary">
-          ← Back to booking
+          ← Back
         </Link>
+        </div>
       </header>
 
-      <h1 className="mt-16 font-display text-7xl font-black uppercase leading-[0.85] md:text-9xl">The garage.</h1>
+      <h1 className="mt-16 font-display text-[17vw] font-black uppercase leading-[0.85] md:text-9xl">The garage.</h1>
       <p className="mt-4 max-w-md text-muted-foreground">Add or remove the vehicles customers can book. Changes appear in the booking console right away.</p>
 
       <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_380px]">
